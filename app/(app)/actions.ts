@@ -6,6 +6,7 @@ import { createClient } from "../../lib/supabase/server";
 import { attendeeSchema, lookupSchema } from "../../lib/schema";
 import { normalise, clean } from "../../lib/format";
 import { getActiveConvention } from "../../lib/queries";
+import { getSiteOrigin } from "../../lib/site-url";
 
 type ActionState = { error?: string; ok?: string } | null;
 
@@ -231,7 +232,7 @@ export async function forgotPassword(_prev: ActionState, fd: FormData): Promise<
   if (!email) return { error: "Email is required." };
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/reset-password`,
+    redirectTo: `${getSiteOrigin()}/reset-password`,
   });
   if (error) return { error: error.message };
   return { ok: "Password reset email sent! Check your inbox." };

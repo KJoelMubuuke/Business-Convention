@@ -70,6 +70,7 @@ Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 ### Database Initialization
@@ -87,6 +88,28 @@ npm install
 npm run dev
 ```
 Navigate to `http://localhost:3000`. 
+
+### Cloudflare Pages Deployment
+This app is ready for Cloudflare Pages using the Next.js adapter.
+
+Build command:
+```bash
+npm run build:cloudflare
+```
+
+Cloudflare Pages output directory:
+```text
+.vercel/output/static
+```
+
+Environment variables to set in Cloudflare Pages:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SITE_URL=https://your-custom-domain.com
+```
+
+If you do not set `NEXT_PUBLIC_SITE_URL`, the app will fall back to Cloudflare's deployment URL when available.
 
 ---
 
