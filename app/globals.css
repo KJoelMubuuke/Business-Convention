@@ -16,3 +16,9 @@ body {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: #1e293b; }
 ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+
+@layer components {
+  .nav-link {
+    @apply px-3 py-1.5 rounded-lg text-sm text-slate-600 transition-colors hover:text-blue-700 hover:bg-blue-50;
+  }
+}
