@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { NavLink } from "../../components/nav-link";
 import { getProfile, getActiveConvention } from "../../lib/queries";
 import { logout } from "./actions";
 
@@ -20,24 +20,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             Menu
           </div>
           
-          <Link href="/" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">
-            <span className="mr-3">📝</span> Register Attendee
-          </Link>
-          <Link href="/records" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">
-            <span className="mr-3">📋</span> All Records
-          </Link>
+          <NavLink href="/" icon="📝">Register Attendee</NavLink>
+          <NavLink href="/records" icon="📋">All Records</NavLink>
           
           {(profile?.role === "supervisor" || profile?.role === "system_admin") && (
             <>
               <div className="text-xs font-semibold text-white/50 uppercase tracking-wider mt-6 mb-2 px-3">
                 Management
               </div>
-              <Link href="/checkin" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">
-                <span className="mr-3">✅</span> Check-in Desk
-              </Link>
-              <Link href="/dashboard" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">
-                <span className="mr-3">📊</span> Analytics Dashboard
-              </Link>
+              <NavLink href="/checkin" icon="✅">Check-in Desk</NavLink>
+              <NavLink href="/dashboard" icon="📊">Analytics Dashboard</NavLink>
             </>
           )}
 
@@ -46,15 +38,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <div className="text-xs font-semibold text-white/50 uppercase tracking-wider mt-6 mb-2 px-3">
                 System Admin
               </div>
-              <Link href="/admin/lookups" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">
-                <span className="mr-3">⚙️</span> Lookups
-              </Link>
-              <Link href="/admin/conventions" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">
-                <span className="mr-3">📅</span> Conventions
-              </Link>
-              <Link href="/admin/users" className="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-white/80 hover:bg-white/10 hover:text-white transition-colors">
-                <span className="mr-3">👥</span> User Management
-              </Link>
+              <NavLink href="/admin/lookups" icon="⚙️">Lookups</NavLink>
+              <NavLink href="/admin/conventions" icon="📅">Conventions</NavLink>
+              <NavLink href="/admin/users" icon="👥">User Management</NavLink>
             </>
           )}
         </nav>
