@@ -23,12 +23,18 @@ export default async function RecordsPage({
   const q = (sp.q ?? "").trim();
   const genderFilter = sp.gender ?? "";
   const residencyFilter = sp.residency ?? "";
+  const createdByFilter = sp.created_by ?? "";
 
   const [convention, profile] = await Promise.all([getActiveConvention(), getProfile()]);
   if (!convention) return <p className="text-red-400">No active convention.</p>;
+  const isManagement = profile?.role === "system_admin" || profile?.role === "supervisor";
   const canDelete = profile?.role === "system_admin";
 
   const supabase = await createClient();
+  
+  // Fetch profiles for the "Registered By" mapping
+  const { data: profilesData } = await supabase.from("profiles").select("id, full_name");
+  const profilesMap = new Map(profilesData?.map((p) => [p.id, p.full_name]) ?? []);
   let query = supabase
     .from("attendees")
     .select("*")
@@ -42,6 +48,7 @@ export default async function RecordsPage({
   }
   if (genderFilter) query = query.eq("gender", genderFilter);
   if (residencyFilter) query = query.eq("residency", residencyFilter);
+  if (createdByFilter) query = query.eq("created_by", createdByFilter);
 
   const { data } = await query;
   const rows = (data ?? []) as Attendee[];
@@ -107,6 +114,22 @@ export default async function RecordsPage({
           <option value="Resident">Resident</option>
           <option value="Non-Resident">Non-Resident</option>
         </select>
+        
+        {isManagement && (
+          <select
+            name="created_by"
+            defaultValue={createdByFilter}
+            className="rounded-xl bg-slate-50 border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500"
+          >
+            <option value="">All Registerers</option>
+            {profilesData?.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.full_name}
+              </option>
+            ))}
+          </select>
+        )}
+
         <button className="rounded-xl bg-blue-700 hover:bg-blue-800 px-4 py-2 text-sm font-semibold text-white transition-colors">
           Search
         </button>
@@ -128,6 +151,9 @@ export default async function RecordsPage({
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Payment</th>
               <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Paid</th>
               <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Registered</th>
+              {isManagement && (
+                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">By</th>
+              )}
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
@@ -152,6 +178,11 @@ export default async function RecordsPage({
                 </td>
                 <td className="px-4 py-3 text-right text-slate-900 font-medium">{money(r.amount_paid)}</td>
                 <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{formatDate(r.created_at)}</td>
+                {isManagement && (
+                  <td className="px-4 py-3 text-xs text-slate-700 whitespace-nowrap">
+                    {profilesMap.get(r.created_by) || "Unknown"}
+                  </td>
+                )}
                 <td className="px-4 py-3 text-right whitespace-nowrap">
                   {profile?.role !== "registerer" && (
                     <Link href={`/records/${r.id}`} className="text-blue-600 hover:text-blue-800 text-xs mr-3 transition-colors font-medium">
@@ -164,7 +195,7 @@ export default async function RecordsPage({
             ))}
             {!rows.length && (
               <tr>
-                <td colSpan={9} className="px-4 py-10 text-center text-slate-500">
+                <td colSpan={isManagement ? 10 : 9} className="px-4 py-10 text-center text-slate-500">
                   No records found.
                 </td>
               </tr>
