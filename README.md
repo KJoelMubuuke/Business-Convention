@@ -1,18 +1,6 @@
-<div align="center">
-
-<img src="./public/icon.png" alt="Victory Men Fellowship" width="100" />
-
 # Business Convention Registration System
 
 **A secure, role-based, real-time registration & attendance tracking portal — built for the 12th Business Convention 2026.**
-
-[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Zod](https://img.shields.io/badge/Zod-Validation-3068B7?style=for-the-badge)](https://zod.dev/)
-
-</div>
 
 ---
 
@@ -105,9 +93,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 Open the **Supabase SQL Editor** and run `supabase/schema.sql`. This single script provisions:
 
-- ✅ All PostgreSQL tables (`profiles`, `conventions`, `attendees`, `lookups`)
-- ✅ Row Level Security (RLS) policies for every table
-- ✅ Auth triggers for automatic user profile generation on sign-up
+- All PostgreSQL tables (`profiles`, `conventions`, `attendees`, `lookups`)
+- Row Level Security (RLS) policies for every table
+- Auth triggers for automatic user profile generation on sign-up
 
 ### 4. Run Locally
 
@@ -169,9 +157,6 @@ convention/
 
 ---
 
-<div align="center">
+---
 
-Built with precision for the **12th Business Convention 2026**  
-*Victory Men Fellowship*
-
-</div>
+Built with precision for the **12th Business Convention 2026** — *Victory Men Fellowship*
