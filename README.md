@@ -1,6 +1,6 @@
 # Business Convention Registration System
 
-**A secure, role-based, real-time registration & attendance tracking portal — built for the 12th Business Convention 2026.**
+**A secure, role-based, real-time registration & attendance tracking portal built for the 12th Business Convention 2026.**
 
 ---
 
@@ -8,7 +8,7 @@
 
 Managing a large-scale business convention with paper records and spreadsheets leads to data loss, inaccurate financial reporting, and slow check-in queues. This system eliminates that chaos entirely.
 
-The **Business Convention Registration System** is a production-ready web portal that digitizes the complete attendee lifecycle — from the registration desk to executive financial reporting — in real time.
+The **Business Convention Registration System** is a production-ready web portal that digitizes the complete attendee lifecycle from the registration desk to executive financial reporting in real time.
 
 ---
 
@@ -27,7 +27,7 @@ The **Business Convention Registration System** is a production-ready web portal
 
 ## Role-Based Access Control
 
-Access is enforced at three distinct levels. All staff authenticate through a unified `/login` portal — the UI adapts dynamically based on the assigned role.
+Access is enforced at three distinct levels. All staff authenticate through a unified `/login` portal  the UI adapts dynamically based on the assigned role.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -132,7 +132,7 @@ Deploy directly via the Vercel dashboard or CLI. The app is fully compatible wit
 
 ## Security
 
-- **Row Level Security (RLS):** Enabled on all database tables. Every query is scoped to the authenticated user's role at the PostgreSQL level — not just in application code.
+- **Row Level Security (RLS):** Enabled on all database tables. Every query is scoped to the authenticated user's role at the PostgreSQL level not just in application code.
 - **Server Actions:** All data mutations execute on the server. No direct API routes are exposed to the client.
 - **HTTP-only Cookies:** Auth sessions are stored in server-side cookies, preventing XSS-based token theft.
 
@@ -159,4 +159,3 @@ convention/
 
 ---
 
-Built with precision for the **12th Business Convention 2026** — *Victory Men Fellowship*
