@@ -8,16 +8,16 @@ import { DeleteButton } from "./delete-button";
 export const dynamic = "force-dynamic";
 
 const PAYMENT_BADGE: Record<string, string> = {
-  Cash: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  MoMo: "bg-blue-50 text-blue-700 border-blue-200",
-  Bank: "bg-purple-50 text-purple-700 border-purple-200",
-  Waived: "bg-slate-100 text-slate-500 border-slate-300",
+  Cash: "bg-[#eaf1ff] text-[#005596] border border-[#005596]/30",
+  MoMo: "bg-[#eaf1ff] text-[#005596] border border-[#005596]/30",
+  Bank: "bg-[#eaf1ff] text-[#005596] border border-[#005596]/30",
+  Waived: "bg-[#ffebd6] text-[#ba1a1a] border border-[#F15A24]/30",
 };
 
 export default async function RecordsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; gender?: string; residency?: string }>;
+  searchParams: Promise<{ q?: string; gender?: string; residency?: string; created_by?: string }>;
 }) {
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
@@ -26,7 +26,7 @@ export default async function RecordsPage({
   const createdByFilter = sp.created_by ?? "";
 
   const [convention, profile] = await Promise.all([getActiveConvention(), getProfile()]);
-  if (!convention) return <p className="text-red-400">No active convention.</p>;
+  if (!convention) return <p className="text-[#ba1a1a]">No active convention.</p>;
   const isManagement = profile?.role === "system_admin" || profile?.role === "supervisor";
   const canDelete = profile?.role === "system_admin";
 
@@ -35,11 +35,18 @@ export default async function RecordsPage({
   // Fetch profiles for the "Registered By" mapping
   const { data: profilesData } = await supabase.from("profiles").select("id, full_name");
   const profilesMap = new Map(profilesData?.map((p) => [p.id, p.full_name]) ?? []);
+  
   let query = supabase
     .from("attendees")
     .select("*")
     .eq("convention_id", convention.id)
     .order("created_at", { ascending: false });
+
+  if (!isManagement) {
+    query = query.eq("created_by", profile?.id);
+  } else if (createdByFilter) {
+    query = query.eq("created_by", createdByFilter);
+  }
 
   if (q) {
     query = query.or(
@@ -48,7 +55,6 @@ export default async function RecordsPage({
   }
   if (genderFilter) query = query.eq("gender", genderFilter);
   if (residencyFilter) query = query.eq("residency", residencyFilter);
-  if (createdByFilter) query = query.eq("created_by", createdByFilter);
 
   const { data } = await query;
   const rows = (data ?? []) as Attendee[];
@@ -59,150 +65,197 @@ export default async function RecordsPage({
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-wrap items-center gap-3 mb-5">
+      {/* Header Section */}
+      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Records</h1>
-          <p className="text-slate-500 text-sm">{convention.title}</p>
+          <h2 className="text-2xl md:text-3xl font-semibold text-[#005596] tracking-tight mb-1">
+            {isManagement ? "Attendee Oversight" : "My Registrations"}
+          </h2>
+          <p className="text-sm text-[#45464d]">
+            {isManagement 
+              ? "Monitor and manage all convention attendees." 
+              : `Viewing records created by you.`}
+          </p>
         </div>
-        <a
-          href={`/api/export`}
-          className="ml-auto rounded-xl bg-slate-50 border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:text-slate-900 hover:border-slate-600 transition-colors"
-        >
-          ↓ Export CSV
-        </a>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-        {[
-          ["Total", String(rows.length)],
-          ["Collected", money(total)],
-          ["Male / Female", `${male} / ${rows.length - male}`],
-          ["Res / Non-Res", `${resident} / ${rows.length - resident}`],
-        ].map(([k, v]) => (
-          <div key={k} className="bg-white border border-slate-200 rounded-xl p-3">
-            <div className="text-xs text-slate-500">{k}</div>
-            <div className="mt-1 font-semibold text-slate-900 text-sm">{v}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Search + Filters */}
-      <form className="flex flex-wrap gap-2 mb-5">
-        <input
-          name="q"
-          defaultValue={q}
-          placeholder="Search name, church, district, phone…"
-          className="flex-1 min-w-48 rounded-xl bg-slate-50 border border-slate-300 px-4 py-2 text-sm text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
-        />
-        <select
-          name="gender"
-          defaultValue={genderFilter}
-          className="rounded-xl bg-slate-50 border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500"
-        >
-          <option value="">All Genders</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-        </select>
-        <select
-          name="residency"
-          defaultValue={residencyFilter}
-          className="rounded-xl bg-slate-50 border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500"
-        >
-          <option value="">All Residency</option>
-          <option value="Resident">Resident</option>
-          <option value="Non-Resident">Non-Resident</option>
-        </select>
-        
         {isManagement && (
-          <select
-            name="created_by"
-            defaultValue={createdByFilter}
-            className="rounded-xl bg-slate-50 border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-blue-500"
+          <a
+            href={`/api/export`}
+            className="bg-white border border-[#c6c6cd] text-[#0b1c30] px-4 py-2 rounded-lg font-semibold text-sm shadow-sm hover:bg-[#e5eeff] transition-colors flex items-center gap-2 self-start md:self-auto h-10"
           >
-            <option value="">All Registerers</option>
-            {profilesData?.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.full_name}
-              </option>
-            ))}
-          </select>
+            <span className="material-symbols-outlined text-[18px]">download</span> Export CSV
+          </a>
         )}
+      </div>
 
-        <button className="rounded-xl bg-blue-700 hover:bg-blue-800 px-4 py-2 text-sm font-semibold text-white transition-colors">
-          Search
-        </button>
-        <a href="/records" className="rounded-xl bg-slate-100 hover:bg-slate-200 px-4 py-2 text-sm text-slate-600 transition-colors border border-slate-300">
-          Clear
-        </a>
+      {/* Summary Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <div className="bg-white p-6 rounded-xl border border-[#c6c6cd] shadow-sm hover:-translate-y-0.5 transition-transform">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-[#005596]">Total Registered</h3>
+            <span className="material-symbols-outlined text-[#F15A24]">person_add</span>
+          </div>
+          <div className="text-3xl font-bold text-[#0b1c30] tracking-tight">{rows.length}</div>
+        </div>
+        <div className="bg-white p-6 rounded-xl border border-[#c6c6cd] shadow-sm hover:-translate-y-0.5 transition-transform">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-[#005596]">Collected (UGX)</h3>
+            <span className="material-symbols-outlined text-[#F15A24]">account_balance_wallet</span>
+          </div>
+          <div className="text-3xl font-bold text-[#0b1c30] tracking-tight">{money(total).replace('UGX ', '')}</div>
+        </div>
+        <div className="bg-white p-6 rounded-xl border border-[#c6c6cd] shadow-sm hover:-translate-y-0.5 transition-transform hidden lg:block">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-[#005596]">Male / Female</h3>
+            <span className="material-symbols-outlined text-[#F15A24]">wc</span>
+          </div>
+          <div className="text-3xl font-bold text-[#0b1c30] tracking-tight">{male} / {rows.length - male}</div>
+        </div>
+        <div className="bg-white p-6 rounded-xl border border-[#c6c6cd] shadow-sm hover:-translate-y-0.5 transition-transform hidden sm:block">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-[#005596]">Res / Non-Res</h3>
+            <span className="material-symbols-outlined text-[#F15A24]">location_on</span>
+          </div>
+          <div className="text-3xl font-bold text-[#0b1c30] tracking-tight">{resident} / {rows.length - resident}</div>
+        </div>
+      </div>
+
+      {/* Toolbar / Search & Filters */}
+      <form className="flex flex-col xl:flex-row gap-4 mb-4 bg-white p-4 rounded-xl border border-[#c6c6cd] shadow-sm">
+        <div className="relative flex-grow">
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span className="material-symbols-outlined text-[#76777d]">search</span>
+          </span>
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder="Search name, church, district, phone..."
+            className="w-full pl-10 pr-4 py-2 bg-[#f8f9ff] border border-[#c6c6cd] rounded-lg focus:outline-none focus:border-[#F15A24] focus:ring-1 focus:ring-[#F15A24] text-sm text-[#0b1c30] h-10 transition-shadow"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2 md:gap-4">
+          <select
+            name="gender"
+            defaultValue={genderFilter}
+            className="h-10 rounded-lg bg-[#f8f9ff] border border-[#c6c6cd] px-3 py-2 text-sm text-[#0b1c30] focus:outline-none focus:ring-2 focus:ring-[#F15A24] min-w-[120px]"
+          >
+            <option value="">All Genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+          <select
+            name="residency"
+            defaultValue={residencyFilter}
+            className="h-10 rounded-lg bg-[#f8f9ff] border border-[#c6c6cd] px-3 py-2 text-sm text-[#0b1c30] focus:outline-none focus:ring-2 focus:ring-[#F15A24] min-w-[130px]"
+          >
+            <option value="">All Residency</option>
+            <option value="Resident">Resident</option>
+            <option value="Non-Resident">Non-Resident</option>
+          </select>
+          
+          {isManagement && (
+            <select
+              name="created_by"
+              defaultValue={createdByFilter}
+              className="h-10 rounded-lg bg-[#f8f9ff] border border-[#c6c6cd] px-3 py-2 text-sm text-[#0b1c30] focus:outline-none focus:ring-2 focus:ring-[#F15A24] min-w-[150px]"
+            >
+              <option value="">All Clerks</option>
+              {profilesData?.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.full_name}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <div className="flex gap-2 w-full sm:w-auto">
+            <button className="h-10 rounded-lg bg-[#005596] hover:bg-[#00437a] px-4 py-2 text-sm font-semibold text-white transition-colors flex-grow sm:flex-grow-0 flex items-center justify-center gap-2">
+              <span className="material-symbols-outlined text-[18px]">filter_list</span> Apply
+            </button>
+            <a href="/records" className="h-10 rounded-lg bg-white hover:bg-[#e5eeff] border border-[#c6c6cd] px-4 py-2 text-sm font-semibold text-[#45464d] transition-colors flex-grow sm:flex-grow-0 flex items-center justify-center">
+              Clear
+            </a>
+          </div>
+        </div>
       </form>
 
-      {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-200">
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Name</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Church</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">District</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">G</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Residency</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Payment</th>
-              <th className="text-right px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Paid</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Registered</th>
-              {isManagement && (
-                <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase tracking-wide">By</th>
-              )}
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
-            {rows.map((r) => (
-              <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
-                <td className="px-4 py-3">
-                  <div className="font-medium text-slate-900">{r.full_name}</div>
-                  {r.occupation && <div className="text-xs text-slate-500">{r.occupation}</div>}
-                  {r.checked_in_at && (
-                    <div className="text-xs text-emerald-400 mt-0.5">✓ Checked in</div>
-                  )}
-                </td>
-                <td className="px-4 py-3 text-slate-700">{r.church}</td>
-                <td className="px-4 py-3 text-slate-700">{r.district}</td>
-                <td className="px-4 py-3 text-slate-500">{r.gender[0]}</td>
-                <td className="px-4 py-3 text-slate-700">{r.residency}</td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-0.5 rounded-md border text-xs font-medium ${PAYMENT_BADGE[r.payment_method] ?? ""}`}>
-                    {r.payment_method}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right text-slate-900 font-medium">{money(r.amount_paid)}</td>
-                <td className="px-4 py-3 text-xs text-slate-500 whitespace-nowrap">{formatDate(r.created_at)}</td>
-                {isManagement && (
-                  <td className="px-4 py-3 text-xs text-slate-700 whitespace-nowrap">
-                    {profilesMap.get(r.created_by) || "Unknown"}
-                  </td>
-                )}
-                <td className="px-4 py-3 text-right whitespace-nowrap">
-                  {profile?.role !== "registerer" && (
-                    <Link href={`/records/${r.id}`} className="text-blue-600 hover:text-blue-800 text-xs mr-3 transition-colors font-medium">
-                      Edit
-                    </Link>
-                  )}
-                  {canDelete && <DeleteButton id={r.id} name={r.full_name} />}
-                </td>
-              </tr>
-            ))}
-            {!rows.length && (
-              <tr>
-                <td colSpan={isManagement ? 10 : 9} className="px-4 py-10 text-center text-slate-500">
-                  No records found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      {/* List View */}
+      <div className="bg-white rounded-xl border border-[#c6c6cd] shadow-sm overflow-hidden">
+        <div className="divide-y divide-[#c6c6cd]">
+          {rows.map((r) => {
+             const initials = r.full_name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+             const isResident = r.residency === "Resident";
+
+             return (
+              <div key={r.id} className="p-4 md:p-6 hover:bg-[#f8f9ff] transition-colors flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 group">
+                <div className="flex items-start gap-4 w-full xl:w-auto">
+                  <div className="w-12 h-12 rounded-full bg-[#ffebd6] text-[#F15A24] flex items-center justify-center font-bold text-lg flex-shrink-0 border border-[#F15A24]/20 hidden sm:flex">
+                     {initials}
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-lg text-[#0b1c30]">{r.full_name}</h4>
+                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider ${isResident ? 'bg-[#d3e4fe] text-[#005596]' : 'bg-[#e5eeff] text-[#45464d]'}`}>
+                        {r.residency}
+                      </span>
+                    </div>
+                    <div className="text-sm text-[#45464d] flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 mb-1">
+                      <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px] text-[#76777d]">church</span> {r.church}</span>
+                      <span className="hidden sm:inline text-[#c6c6cd]">•</span>
+                      <span className="font-mono text-[13px] font-medium text-[#76777d]">ID: {r.id.substring(0,8).toUpperCase()}</span>
+                      <span className="hidden sm:inline text-[#c6c6cd]">•</span>
+                      <span className="text-[#45464d]">{r.gender}</span>
+                    </div>
+                    {isManagement && (
+                      <div className="text-xs text-[#76777d]">
+                        Registered by <span className="font-medium text-[#45464d]">{profilesMap.get(r.created_by) || "Unknown"}</span> on {formatDate(r.created_at)}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full xl:w-auto xl:justify-end mt-2 xl:mt-0">
+                  <div className="flex flex-col items-start sm:items-end">
+                    <span className="text-lg font-bold text-[#0b1c30] tracking-tight">{money(r.amount_paid)}</span>
+                    <span className={`px-2 py-0.5 rounded mt-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${PAYMENT_BADGE[r.payment_method] || 'bg-slate-100 text-slate-500'}`}>
+                      <span className="material-symbols-outlined text-[12px]">
+                         {r.payment_method === 'Waived' ? 'stars' : 'check_circle'}
+                      </span>
+                      {r.payment_method}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end">
+                    {profile?.role !== "registerer" && (
+                      <Link href={`/records/${r.id}`} className="px-4 py-2 border border-[#F15A24] text-[#F15A24] rounded-lg hover:bg-[#ffebd6] transition-colors font-semibold text-sm flex items-center gap-2 h-10 w-full sm:w-auto justify-center xl:opacity-0 xl:group-hover:opacity-100 xl:focus-within:opacity-100">
+                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                        Edit
+                      </Link>
+                    )}
+                    {canDelete && <DeleteButton id={r.id} name={r.full_name} />}
+                  </div>
+                </div>
+              </div>
+             );
+          })}
+          
+          {rows.length === 0 && (
+            <div className="p-10 text-center flex flex-col items-center justify-center">
+              <span className="material-symbols-outlined text-4xl text-[#76777d] mb-3">inbox</span>
+              <p className="text-[#45464d] text-lg font-medium">No registrations found.</p>
+              <p className="text-sm text-[#76777d] mt-1">Try adjusting your filters or search query.</p>
+            </div>
+          )}
+        </div>
+        
+        {rows.length > 0 && (
+          <div className="p-4 border-t border-[#c6c6cd] bg-[#f8f9ff] flex justify-center">
+            <button className="text-sm font-semibold text-[#005596] hover:underline px-4 py-2 rounded-lg hover:bg-[#e5eeff] transition-colors h-10">
+              Load More Registrations
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

@@ -17,9 +17,9 @@ export function NavLink({ href, icon, children }: NavLinkProps) {
   return (
     <Link 
       href={href} 
-      className={`sidebar-link ${isActive ? "sidebar-link-active" : ""}`}
+      className={`sidebar-link ${isActive ? "sidebar-link-active" : "text-[#45464d]"}`}
     >
-      <span className="mr-3">{icon}</span> {children}
+      <span className={`material-symbols-outlined mr-3 ${isActive ? "text-[#F15A24]" : "text-[#76777d]"}`} style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>{icon}</span> {children}
     </Link>
   );
 }

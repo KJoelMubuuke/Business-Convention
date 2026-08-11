@@ -29,14 +29,18 @@ export default async function EditPage({
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/records" className="text-slate-500 hover:text-slate-700 text-sm transition-colors">
-          ← Records
+        <Link href="/records" className="flex items-center gap-1 text-[#005596] hover:text-[#00437a] text-sm font-semibold bg-[#e5eeff] px-3 py-1.5 rounded-lg transition-colors">
+          <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+          Back to Records
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900">Edit Record</h1>
+        <div>
+           <h2 className="text-2xl md:text-3xl font-semibold text-[#005596] tracking-tight">Edit Record</h2>
+        </div>
       </div>
-      <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-2xl">
+      <div>
         <AttendeeForm lookups={lookups} convention={convention} existing={data as Attendee} />
       </div>
     </div>
   );
 }
+

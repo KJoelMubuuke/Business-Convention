@@ -1,11 +1,35 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+/* ── Stitch Design Tokens ────────────────────────────────────────── */
 :root {
-  --font-inter: "Inter", sans-serif;
-  --brand-blue: #0f2d6e;
-  --brand-orange: #e85d20;
-  --brand-blue-light: #1a4fbf;
+  /* Brand */
+  --primary:                  #005596;
+  --secondary:                #F15A24;
+  --background:               #f8f9ff;
+  --surface:                  #f8f9ff;
+  --surface-bright:           #f8f9ff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low:    #eff4ff;
+  --surface-container:        #e5eeff;
+  --surface-container-high:   #dce9ff;
+  --surface-container-highest:#d3e4fe;
+  --surface-variant:          #d3e4fe;
+  --surface-dim:              #cbdbf5;
+  --on-background:            #0b1c30;
+  --on-surface:               #0b1c30;
+  --on-surface-variant:       #45464d;
+  --on-primary:               #ffffff;
+  --on-secondary:             #ffffff;
+  --primary-container:        #131b2e;
+  --secondary-container:      #ffebd6;
+  --on-primary-container:     #7c839b;
+  --outline:                  #76777d;
+  --outline-variant:          #c6c6cd;
+  --error:                    #ba1a1a;
+  --error-container:          #ffdad6;
+  --on-error-container:       #93000a;
+  --inverse-surface:          #213145;
+  --inverse-on-surface:       #eaf1ff;
 }
 
 * {
@@ -13,50 +37,94 @@
 }
 
 body {
-  font-family: var(--font-inter), system-ui, sans-serif;
+  background-color: var(--background);
+  color: var(--on-surface);
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #f1f5f9; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+/* ── Custom scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar         { width: 6px; height: 6px; }
+::-webkit-scrollbar-track   { background: var(--surface-container-low); }
+::-webkit-scrollbar-thumb   { background: var(--outline-variant); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--outline); }
 
+/* ── Glass card ───────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--outline-variant);
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+}
+
+/* ── Toggle switch ────────────────────────────────────────────────── */
+.toggle-checkbox:checked {
+  right: 0;
+  border-color: #F15A24;
+}
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #F15A24;
+}
+
+/* ── Segmented control ────────────────────────────────────────────── */
+.segmented-control input:checked + label {
+  background-color: #F15A24;
+  color: #ffffff;
+  border-color: #F15A24;
+  z-index: 10;
+}
+
+/* ── Sidebar active link ──────────────────────────────────────────── */
 @layer components {
-  /* Sidebar active link */
   .sidebar-link {
-    @apply flex items-center px-3 py-2.5 rounded-lg text-sm font-medium text-white/75 hover:bg-white/10 hover:text-white transition-all duration-150;
+    @apply flex items-center px-3 py-2 text-sm rounded-lg text-[#45464d] hover:bg-[#e5eeff] transition-colors;
   }
   .sidebar-link-active {
-    @apply bg-white/15 text-white shadow-inner;
+    @apply bg-[#ffebd6] text-[#F15A24] font-bold relative;
+  }
+  .sidebar-link-active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 24px;
+    background: #F15A24;
+    border-radius: 0 4px 4px 0;
   }
 
-  /* Card */
-  .card {
-    @apply bg-white border border-slate-200 rounded-2xl shadow-sm;
-  }
-
-  /* Badge */
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
-  }
-
-  /* Input */
+  /* Form inputs */
   .form-input {
-    @apply w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-900 text-sm placeholder-slate-400
-           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all;
+    @apply w-full rounded border border-[#c6c6cd] bg-[#f8f9ff] px-3 py-2 h-10 text-sm text-[#0b1c30] placeholder-[#76777d]
+           focus:outline-none focus:ring-2 focus:ring-[#F15A24] focus:border-transparent transition-all;
   }
 
-  /* Primary button */
+  /* Primary (blue) button */
   .btn-primary {
-    @apply rounded-xl py-3 px-6 font-bold text-sm text-white transition-all
-           disabled:opacity-50 disabled:cursor-not-allowed;
-    background: linear-gradient(90deg, #e85d20 0%, #f08040 100%);
-    box-shadow: 0 4px 20px rgba(232,93,32,0.30);
+    @apply rounded-lg py-3 px-6 font-semibold text-sm text-white bg-[#005596] hover:bg-[#00437a]
+           hover:-translate-y-0.5 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Secondary (orange) button */
+  .btn-secondary {
+    @apply rounded-lg py-3 px-6 font-semibold text-sm text-white bg-[#F15A24] hover:opacity-90
+           hover:-translate-y-0.5 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   /* Ghost button */
   .btn-ghost {
-    @apply rounded-xl py-2.5 px-4 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors;
+    @apply rounded-lg py-2 px-4 text-sm font-semibold text-[#45464d] border border-[#c6c6cd] hover:bg-[#e5eeff] transition-colors;
+  }
+
+  /* Card */
+  .card {
+    @apply bg-white border border-[#c6c6cd] rounded-xl shadow-sm;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-bold;
   }
 }

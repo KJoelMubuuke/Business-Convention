@@ -19,68 +19,87 @@ export default async function UsersPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
-        <p className="text-slate-500 text-sm mt-1">Assign roles to staff members — System Admin, Supervisor or Registerer</p>
+      <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-semibold text-[#005596] tracking-tight mb-1">User Management</h2>
+          <p className="text-sm text-[#45464d]">Assign roles and manage system access for staff members.</p>
+        </div>
+        <button className="bg-[#005596] hover:bg-[#00437a] text-white px-4 py-2 rounded-lg font-semibold text-sm shadow-sm transition-colors flex items-center gap-2 self-start md:self-auto h-10">
+          <span className="material-symbols-outlined text-[18px]">person_add</span> Add User
+        </button>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 bg-slate-50">
-              <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Name</th>
-              <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Current Role</th>
-              <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide text-right">Change Role</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {users.map((u) => (
-              <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-5 py-4">
-                  <div className="font-medium text-slate-900">{u.full_name}</div>
-                </td>
-                <td className="px-5 py-4">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                    u.role === "system_admin"
-                      ? "bg-orange-100 text-orange-700"
-                      : u.role === "supervisor"
-                      ? "bg-blue-100 text-blue-700"
-                      : "bg-slate-100 text-slate-600"
-                  }`}>
-                    {u.role === "system_admin" ? "System Admin" : u.role === "supervisor" ? "Supervisor" : "Registerer"}
-                  </span>
-                </td>
-                <td className="px-5 py-4 text-right">
-                  {u.id !== profile.id ? (
-                    <form action={updateUserRole} className="inline-flex justify-end items-center gap-2">
-                      <input type="hidden" name="id" value={u.id} />
-                      <select
-                        name="role"
-                        defaultValue={u.role}
-                        className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:border-blue-500"
-                      >
-                        <option value="system_admin">System Admin</option>
-                        <option value="supervisor">Supervisor</option>
-                        <option value="registerer">Registerer</option>
-                      </select>
-                      <button className="rounded-lg bg-blue-700 hover:bg-blue-800 text-white px-3 py-1.5 text-xs font-semibold transition-colors">
-                        Save
-                      </button>
-                    </form>
-                  ) : (
-                    <span className="text-xs text-slate-400 italic">You</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-            {users.length === 0 && (
-              <tr>
-                <td colSpan={3} className="px-5 py-10 text-center text-slate-400">No users found.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative pb-20">
+        {users.map((u) => {
+          const initials = u.full_name ? u.full_name.substring(0, 2).toUpperCase() : "U";
+          const isAdmin = u.role === "system_admin";
+          const isSupervisor = u.role === "supervisor";
+          
+          return (
+            <div key={u.id} className="bg-white rounded-xl border border-[#c6c6cd] shadow-sm p-6 flex flex-col relative overflow-hidden group hover:border-[#005596]/30 hover:shadow-md transition-all">
+               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
+                 <span className="material-symbols-outlined text-[60px]">{isAdmin ? 'shield_person' : isSupervisor ? 'supervisor_account' : 'person'}</span>
+               </div>
+               
+               <div className="flex items-start gap-4 mb-6 relative z-10">
+                 <div className="w-12 h-12 rounded-full border border-[#c6c6cd] bg-[#e5eeff] flex items-center justify-center text-[#005596] font-bold text-lg flex-shrink-0">
+                   {initials}
+                 </div>
+                 <div>
+                   <h3 className="font-semibold text-lg text-[#0b1c30] truncate pr-8">{u.full_name}</h3>
+                   <span className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider inline-block mt-1 ${
+                     isAdmin ? "bg-[#ffebd6] text-[#ba1a1a]" : 
+                     isSupervisor ? "bg-[#d3e4fe] text-[#005596]" : 
+                     "bg-[#e5eeff] text-[#45464d]"
+                   }`}>
+                     {isAdmin ? "System Admin" : isSupervisor ? "Supervisor" : "Registerer"}
+                   </span>
+                 </div>
+               </div>
+               
+               <div className="mt-auto pt-4 border-t border-[#c6c6cd] relative z-10">
+                 {u.id !== profile.id ? (
+                   <form action={updateUserRole} className="flex items-center gap-2">
+                     <input type="hidden" name="id" value={u.id} />
+                     <div className="relative flex-grow">
+                        <select
+                          name="role"
+                          defaultValue={u.role}
+                          className="w-full appearance-none rounded-lg border border-[#c6c6cd] bg-[#f8f9ff] px-3 py-2 text-sm text-[#0b1c30] focus:outline-none focus:border-[#F15A24] focus:ring-1 focus:ring-[#F15A24] transition-colors pr-8 h-10"
+                        >
+                          <option value="system_admin">System Admin</option>
+                          <option value="supervisor">Supervisor</option>
+                          <option value="registerer">Registerer</option>
+                        </select>
+                        <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                          <span className="material-symbols-outlined text-[#76777d]">expand_more</span>
+                        </span>
+                     </div>
+                     <button className="rounded-lg bg-[#005596] hover:bg-[#00437a] text-white px-3 h-10 text-sm font-semibold transition-colors flex-shrink-0 flex items-center justify-center min-w-[70px]">
+                       Save
+                     </button>
+                   </form>
+                 ) : (
+                   <div className="flex items-center justify-center gap-2 h-10 bg-[#f8f9ff] border border-[#c6c6cd] rounded-lg text-[#76777d] text-sm font-medium italic">
+                     <span className="material-symbols-outlined text-[18px]">verified_user</span> This is you
+                   </div>
+                 )}
+               </div>
+            </div>
+          );
+        })}
+        {users.length === 0 && (
+          <div className="col-span-full p-10 text-center flex flex-col items-center justify-center bg-white rounded-xl border border-[#c6c6cd]">
+            <span className="material-symbols-outlined text-4xl text-[#76777d] mb-3">group_off</span>
+            <p className="text-[#45464d] text-lg font-medium">No users found.</p>
+          </div>
+        )}
       </div>
+      
+      {/* Floating Action Button (FAB) for mobile/desktop adding users */}
+      <button className="fixed bottom-[84px] md:bottom-8 right-4 md:right-8 w-14 h-14 bg-[#F15A24] hover:bg-[#e04a15] hover:-translate-y-1 transition-all rounded-full shadow-[0_4px_12px_rgba(241,90,36,0.4)] flex items-center justify-center text-white z-50 group">
+         <span className="material-symbols-outlined text-[28px] group-hover:scale-110 transition-transform">add</span>
+      </button>
     </div>
   );
 }

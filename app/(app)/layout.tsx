@@ -1,4 +1,5 @@
 import { NavLink } from "../../components/nav-link";
+import { BottomNav } from "../../components/bottom-nav";
 import { getProfile, getActiveConvention } from "../../lib/queries";
 import { logout } from "./actions";
 
@@ -6,79 +7,90 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const [profile, convention] = await Promise.all([getProfile(), getActiveConvention()]);
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
-      {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 bg-[#0f2d6e] text-white flex flex-col shadow-xl z-20">
-        {/* Brand Area */}
-        <div className="h-16 flex items-center px-6 border-b border-white/10 bg-white">
-          <img src="/logo.png" alt="Convention 2026" className="h-10 w-auto object-contain" />
+    <div className="min-h-screen font-sans text-[#0b1c30] antialiased flex flex-col md:flex-row bg-[#f8f9ff]">
+      
+      {/* Navigation Drawer (Desktop) / Hide on Mobile */}
+      <nav className="hidden md:flex h-full w-80 rounded-r-xl bg-white shadow-[2px_0_8px_rgba(0,0,0,0.02)] fixed inset-y-0 left-0 z-[60] flex-col p-4 border-r border-[#c6c6cd]">
+        {/* Drawer Header */}
+        <div className="mb-8 flex items-center gap-4 px-2 pt-2">
+          <div className="w-12 h-12 rounded-full overflow-hidden border border-[#c6c6cd] bg-[#e5eeff] flex items-center justify-center text-[#005596] font-bold text-xl">
+            {profile?.full_name ? profile.full_name.substring(0,2).toUpperCase() : profile?.role?.substring(0,2).toUpperCase()}
+          </div>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-[#005596] truncate w-48">{profile?.full_name || profile?.role}</span>
+            <span className="text-sm text-[#45464d] uppercase tracking-wider">{profile?.role === "system_admin" ? "System Admin" : profile?.role === "supervisor" ? "Supervisor" : "Registerer"}</span>
+          </div>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
-          <div className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2 px-3">
-            Menu
-          </div>
-          
-          <NavLink href="/" icon="📝">Register Attendee</NavLink>
-          <NavLink href="/records" icon="📋">All Records</NavLink>
-          
+        {/* Drawer Links */}
+        <div className="flex flex-col gap-2 flex-grow overflow-y-auto px-2">
+          <div className="text-xs font-bold text-[#76777d] uppercase tracking-wider mb-1 px-3 mt-2">Main Menu</div>
+          <NavLink href="/" icon="person_add">Register Attendee</NavLink>
+          <NavLink href="/records" icon="group">Attendee List</NavLink>
+
           {(profile?.role === "supervisor" || profile?.role === "system_admin") && (
             <>
-              <div className="text-xs font-semibold text-white/50 uppercase tracking-wider mt-6 mb-2 px-3">
-                Management
-              </div>
-              <NavLink href="/checkin" icon="✅">Check-in Desk</NavLink>
-              <NavLink href="/dashboard" icon="📊">Analytics Dashboard</NavLink>
+              <div className="text-xs font-bold text-[#76777d] uppercase tracking-wider mb-1 px-3 mt-6">Management</div>
+              <NavLink href="/checkin" icon="qr_code_scanner">Check-in Desk</NavLink>
+              <NavLink href="/dashboard" icon="dashboard">Dashboard</NavLink>
             </>
           )}
 
           {profile?.role === "system_admin" && (
             <>
-              <div className="text-xs font-semibold text-white/50 uppercase tracking-wider mt-6 mb-2 px-3">
-                System Admin
-              </div>
-              <NavLink href="/admin/lookups" icon="⚙️">Lookups</NavLink>
-              <NavLink href="/admin/conventions" icon="📅">Conventions</NavLink>
-              <NavLink href="/admin/users" icon="👥">User Management</NavLink>
+              <div className="text-xs font-bold text-[#76777d] uppercase tracking-wider mb-1 px-3 mt-6">System Admin</div>
+              <NavLink href="/admin/lookups" icon="settings">Lookups</NavLink>
+              <NavLink href="/admin/conventions" icon="event">Conventions</NavLink>
+              <NavLink href="/admin/users" icon="manage_accounts">User Management</NavLink>
             </>
           )}
-        </nav>
-
-        {/* User Role Badge (Bottom Sidebar) */}
-        <div className="p-4 border-t border-white/10">
-           <div className="px-3 py-2 rounded-lg bg-black/20">
-             <div className="text-xs text-white/60 uppercase">Current Role</div>
-             <div className="text-sm font-bold text-white tracking-wide">
-               {profile?.role === "system_admin" ? "System Admin" : profile?.role === "supervisor" ? "Supervisor" : "Registerer"}
-             </div>
-           </div>
         </div>
-      </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-        {/* Top Header */}
-        <header className="h-16 bg-white border-b border-slate-200 flex flex-shrink-0 items-center justify-between px-8 z-10 shadow-sm">
-          <div>
-             <h2 className="text-lg font-bold text-slate-800">Welcome, {profile?.full_name || profile?.role}!</h2>
-          </div>
+        {/* Logout */}
+        <div className="mt-auto pt-4 border-t border-[#c6c6cd] px-2">
+          <form action={logout}>
+            <button type="submit" className="flex items-center gap-4 w-full p-3 rounded-lg text-[#ba1a1a] hover:bg-[#ffdad6] transition-colors">
+              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>logout</span>
+              <span className="text-lg font-semibold">Logout</span>
+            </button>
+          </form>
+        </div>
+      </nav>
+
+      {/* Main Content Wrapper */}
+      <div className="flex-1 flex flex-col md:ml-80">
+        
+        {/* TopAppBar */}
+        <header className="w-full top-0 sticky z-40 bg-white shadow-sm border-b border-[#c6c6cd] flex justify-between items-center px-4 md:px-10 h-16">
           <div className="flex items-center gap-4">
-            <form action={logout}>
-              <button className="rounded-full bg-slate-100 hover:bg-slate-200 px-5 py-2 text-sm font-semibold text-slate-700 transition-colors">
-                Sign Out
-              </button>
-            </form>
+            {/* Leading Icon (Mobile Only - Menu placeholder) */}
+            <button className="md:hidden p-2 rounded-full hover:bg-[#eff4ff] transition-colors text-[#0b1c30] active:opacity-80">
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+            <img src="/logo.png" alt="Business Convention" className="h-8 object-contain hidden md:block" />
+            <h1 className="text-2xl font-bold text-[#005596] md:hidden truncate">Business Convention</h1>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex flex-col items-end mr-2">
+               <span className="text-lg font-semibold text-[#F15A24]">
+                 {profile?.role === "system_admin" ? "System Admin" : profile?.role === "supervisor" ? "Supervisor" : "Registerer"}
+               </span>
+            </div>
+            {/* Trailing Avatar */}
+            <div className="w-10 h-10 rounded-full overflow-hidden border border-[#c6c6cd] bg-[#e5eeff] flex items-center justify-center text-[#005596] font-bold shadow-sm">
+               {profile?.full_name ? profile.full_name.substring(0,2).toUpperCase() : "U"}
+            </div>
           </div>
         </header>
 
-        {/* Scrollable Page Content */}
-        <main className="flex-1 overflow-auto p-8">
-          <div className="max-w-6xl mx-auto w-full">
-            {children}
-          </div>
+        {/* Page Content */}
+        <main className="flex-1 p-4 md:p-10 bg-[#ffffff] pb-[100px] md:pb-10">
+          {children}
         </main>
       </div>
+
+      <BottomNav />
     </div>
   );
 }

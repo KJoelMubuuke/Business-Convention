@@ -5,10 +5,6 @@ import { saveAttendee } from "../app/(app)/actions";
 import type { Attendee, Convention, Lookups } from "../lib/types";
 import { money } from "../lib/format";
 
-const inputCls =
-  "w-full rounded-xl bg-slate-50 border border-slate-300 px-4 py-2.5 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors text-sm";
-const labelCls = "block text-sm font-medium text-slate-700 mb-1.5";
-
 export default function AttendeeForm({
   lookups,
   convention,
@@ -22,25 +18,43 @@ export default function AttendeeForm({
   const formRef = useRef<HTMLFormElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
-  const [residency, setResidency] = useState<string>(existing?.residency ?? "");
-  const fee =
-    residency === "Resident"
-      ? convention.fee_resident
-      : residency === "Non-Resident"
-      ? convention.fee_non_resident
-      : null;
+  const [isResident, setIsResident] = useState<boolean>(existing ? existing.residency === "Resident" : true);
+  const [paymentMethod, setPaymentMethod] = useState<string>(existing?.payment_method ?? "");
+  const [amountPaid, setAmountPaid] = useState<string>(existing?.amount_paid ? String(existing.amount_paid) : "");
+
+  const fee = isResident ? convention.fee_resident : convention.fee_non_resident;
 
   useEffect(() => {
     if (state?.ok && !existing) {
       formRef.current?.reset();
-      setResidency("");
+      setIsResident(true);
+      setPaymentMethod("");
+      setAmountPaid("");
       nameRef.current?.focus();
     }
   }, [state, existing]);
 
+  // Derived styling logic for fee badge and validation
+  let feeBadgeClass = "bg-[#d3e4fe] text-[#005596]";
+  let feeBadgeText = isResident ? "Resident Rate" : "Standard Rate";
+  
+  if (paymentMethod === "Waived") {
+    feeBadgeClass = "bg-[#ffebd6] text-[#ba1a1a]";
+    feeBadgeText = "Fee Waived";
+  } else if (!isResident) {
+    feeBadgeClass = "bg-[#eff4ff] text-[#45464d]";
+  }
+
+  const numericAmount = Number(amountPaid);
+  const isWaived = paymentMethod === "Waived";
+  const isValidAmount = isWaived ? true : (!isNaN(numericAmount) && numericAmount >= fee);
+  const showHelper = !isWaived && amountPaid !== "" && !isValidAmount;
+  const showSuccess = !isWaived && amountPaid !== "" && isValidAmount;
+
   return (
-    <form ref={formRef} action={action} className="space-y-5">
+    <form ref={formRef} action={action} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       {existing && <input type="hidden" name="id" value={existing.id} />}
+      <input type="hidden" name="residency" value={isResident ? "Resident" : "Non-Resident"} />
 
       {/* Datalists for autocomplete */}
       <datalist id="dl-district">
@@ -53,185 +67,274 @@ export default function AttendeeForm({
         {lookups.occupation.map((v) => <option key={v} value={v} />)}
       </datalist>
 
-      {/* Full name */}
-      <div>
-        <label className={labelCls}>Full Name <span className="text-orange-500">*</span></label>
-        <input
-          ref={nameRef}
-          name="full_name"
-          required
-          autoComplete="off"
-          defaultValue={existing?.full_name}
-          placeholder="e.g. John Doe"
-          className={inputCls}
-        />
-      </div>
+      {/* ── Personal Details Section ── */}
+      <div className="lg:col-span-7 space-y-4 bg-white p-6 rounded-xl border border-[#c6c6cd] shadow-sm">
+        <h3 className="text-lg font-semibold text-[#005596] flex items-center border-b border-[#c6c6cd] pb-2 mb-4">
+          <span className="material-symbols-outlined mr-2 text-[#F15A24]">person</span>
+          Personal Details
+        </h3>
 
-      {/* Occupation + District */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Occupation / Title</label>
-          <input
-            name="occupation"
-            list="dl-occupation"
-            autoComplete="off"
-            defaultValue={existing?.occupation}
-            placeholder="e.g. Pastor, Teacher…"
-            className={inputCls}
-          />
+          <label className="block text-xs font-bold text-[#45464d] uppercase mb-1">Full Name <span className="text-[#ba1a1a]">*</span></label>
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span className="material-symbols-outlined text-[#76777d]">badge</span>
+            </span>
+            <input
+              ref={nameRef}
+              name="full_name"
+              required
+              autoComplete="off"
+              defaultValue={existing?.full_name}
+              placeholder="e.g., Jane Doe"
+              className="block w-full pl-10 pr-3 py-2 h-10 border border-[#c6c6cd] rounded bg-[#f8f9ff] text-[#0b1c30] placeholder-[#76777d] focus:outline-none focus:ring-2 focus:ring-[#F15A24] focus:border-transparent transition-all text-sm"
+            />
+          </div>
         </div>
-        <div>
-          <label className={labelCls}>District <span className="text-orange-500">*</span></label>
-          <input
-            name="district"
-            list="dl-district"
-            required
-            autoComplete="off"
-            defaultValue={existing?.district}
-            placeholder="Type to search…"
-            className={inputCls}
-          />
-        </div>
-      </div>
 
-      {/* Church */}
-      <div>
-        <label className={labelCls}>Church <span className="text-orange-500">*</span></label>
-        <input
-          name="church"
-          list="dl-church"
-          required
-          autoComplete="off"
-          defaultValue={existing?.church}
-          placeholder="Type to search…"
-          className={inputCls}
-        />
-      </div>
-
-      {/* Gender + Residency */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Gender <span className="text-orange-500">*</span></label>
-          <select
-            name="gender"
-            required
-            defaultValue={existing?.gender ?? ""}
-            className={inputCls}
-          >
-            <option value="" disabled>Choose…</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
+          <label className="block text-xs font-bold text-[#45464d] uppercase mb-1">Occupation</label>
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span className="material-symbols-outlined text-[#76777d]">work</span>
+            </span>
+            <input
+              name="occupation"
+              list="dl-occupation"
+              autoComplete="off"
+              defaultValue={existing?.occupation}
+              placeholder="e.g., Software Engineer"
+              className="block w-full pl-10 pr-3 py-2 h-10 border border-[#c6c6cd] rounded bg-[#f8f9ff] text-[#0b1c30] placeholder-[#76777d] focus:outline-none focus:ring-2 focus:ring-[#F15A24] focus:border-transparent transition-all text-sm"
+            />
+          </div>
         </div>
-        <div>
-          <label className={labelCls}>Residency <span className="text-orange-500">*</span></label>
-          <select
-            name="residency"
-            required
-            value={residency}
-            onChange={(e) => setResidency(e.target.value)}
-            className={inputCls}
-          >
-            <option value="" disabled>Choose…</option>
-            <option value="Resident">Resident — {money(convention.fee_resident)}</option>
-            <option value="Non-Resident">Non-Resident — {money(convention.fee_non_resident)}</option>
-          </select>
-        </div>
-      </div>
 
-      {/* Amount paid + Payment method */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelCls}>
-            Amount Paid (UGX)
-            {fee !== null && (
-              <span className="ml-2 text-orange-500 font-normal text-xs">
-                Fee: {money(fee)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-[#45464d] uppercase mb-1">Gender <span className="text-[#ba1a1a]">*</span></label>
+            <div className="flex segmented-control relative h-10">
+              <div className="flex-1 relative">
+                <input className="sr-only" id="genderMale" name="gender" type="radio" value="Male" defaultChecked={existing?.gender === "Male" || !existing} />
+                <label className="block w-full h-full text-center py-2 text-sm border border-[#c6c6cd] rounded-l cursor-pointer bg-[#f8f9ff] text-[#0b1c30] hover:bg-[#e5eeff] transition-colors" htmlFor="genderMale">Male</label>
+              </div>
+              <div className="flex-1 relative -ml-[1px]">
+                <input className="sr-only" id="genderFemale" name="gender" type="radio" value="Female" defaultChecked={existing?.gender === "Female"} />
+                <label className="block w-full h-full text-center py-2 text-sm border border-[#c6c6cd] rounded-r cursor-pointer bg-[#f8f9ff] text-[#0b1c30] hover:bg-[#e5eeff] transition-colors" htmlFor="genderFemale">Female</label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-[#45464d] uppercase mb-1">Residency Status</label>
+            <div className="flex items-center h-10">
+              <div className="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                <input 
+                  checked={isResident} 
+                  onChange={(e) => setIsResident(e.target.checked)}
+                  type="checkbox" 
+                  className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer z-10 transition-transform duration-200" 
+                />
+                <label className="toggle-label block overflow-hidden h-6 rounded-full bg-[#c6c6cd] cursor-pointer transition-colors duration-200"></label>
+              </div>
+              <span className="text-sm text-[#0b1c30] font-medium">{isResident ? "Resident" : "Non-Resident"}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-[#45464d] uppercase mb-1">District <span className="text-[#ba1a1a]">*</span></label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="material-symbols-outlined text-[#76777d]">location_city</span>
               </span>
+              <input
+                name="district"
+                list="dl-district"
+                required
+                autoComplete="off"
+                defaultValue={existing?.district}
+                placeholder="Select or type..."
+                className="block w-full pl-10 pr-3 py-2 h-10 border border-[#c6c6cd] rounded bg-[#f8f9ff] text-[#0b1c30] placeholder-[#76777d] focus:outline-none focus:ring-2 focus:ring-[#F15A24] focus:border-transparent transition-all text-sm"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-[#45464d] uppercase mb-1">Church / Organization <span className="text-[#ba1a1a]">*</span></label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="material-symbols-outlined text-[#76777d]">church</span>
+              </span>
+              <input
+                name="church"
+                list="dl-church"
+                required
+                autoComplete="off"
+                defaultValue={existing?.church}
+                placeholder="Select or type..."
+                className="block w-full pl-10 pr-3 py-2 h-10 border border-[#c6c6cd] rounded bg-[#f8f9ff] text-[#0b1c30] placeholder-[#76777d] focus:outline-none focus:ring-2 focus:ring-[#F15A24] focus:border-transparent transition-all text-sm"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Phone + Notes */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div>
+            <label className="block text-xs font-bold text-[#45464d] uppercase mb-1">Phone</label>
+            <div className="relative">
+               <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                 <span className="material-symbols-outlined text-[#76777d]">phone</span>
+               </span>
+               <input
+                 name="phone"
+                 inputMode="tel"
+                 defaultValue={existing?.phone}
+                 placeholder="e.g. 0772 123 456"
+                 className="block w-full pl-10 pr-3 py-2 h-10 border border-[#c6c6cd] rounded bg-[#f8f9ff] text-[#0b1c30] placeholder-[#76777d] focus:outline-none focus:ring-2 focus:ring-[#F15A24] focus:border-transparent transition-all text-sm"
+               />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-[#45464d] uppercase mb-1">Notes</label>
+            <div className="relative">
+               <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                 <span className="material-symbols-outlined text-[#76777d]">edit_note</span>
+               </span>
+               <input
+                 name="notes"
+                 defaultValue={existing?.notes}
+                 placeholder="Any remarks..."
+                 className="block w-full pl-10 pr-3 py-2 h-10 border border-[#c6c6cd] rounded bg-[#f8f9ff] text-[#0b1c30] placeholder-[#76777d] focus:outline-none focus:ring-2 focus:ring-[#F15A24] focus:border-transparent transition-all text-sm"
+               />
+            </div>
+          </div>
+        </div>
+
+        {/* Allow duplicate */}
+        {!existing && (
+          <div className="pt-2">
+            <label className="flex items-center gap-2 text-sm text-[#45464d] cursor-pointer">
+              <input
+                type="checkbox"
+                name="allow_duplicate"
+                value="yes"
+                className="w-4 h-4 rounded text-[#F15A24] border-[#c6c6cd] focus:ring-[#F15A24]"
+              />
+              Allow duplicate name for this church
+            </label>
+          </div>
+        )}
+      </div>
+
+      {/* ── Payment & Logistics Section ── */}
+      <div className="lg:col-span-5 space-y-4 flex flex-col">
+        {/* Registration Fee Card */}
+        <div className="bg-white p-4 md:p-6 rounded-xl border border-[#c6c6cd] shadow-sm relative overflow-hidden group hover:-translate-y-[2px] transition-transform duration-200 flex-shrink-0">
+          <div className="absolute top-0 right-0 p-2 opacity-10">
+            <span className="material-symbols-outlined text-[100px]" style={{ fontVariationSettings: "'FILL' 1" }}>payments</span>
+          </div>
+          <h3 className="text-lg font-semibold text-[#005596] flex items-center border-b border-[#c6c6cd] pb-2 mb-4 relative z-10">
+            <span className="material-symbols-outlined mr-2 text-[#F15A24]">receipt_long</span>
+            Registration Fee
+          </h3>
+          <div className="relative z-10">
+            <p className="text-xs font-bold text-[#45464d] uppercase mb-1 tracking-wider">Required Amount (UGX)</p>
+            <div className="flex items-end">
+              <span className="text-5xl font-bold text-[#005596] tracking-tight">{fee.toLocaleString()}</span>
+            </div>
+            <div className={`inline-block mt-3 px-2 py-1 rounded text-xs font-bold uppercase tracking-wide ${feeBadgeClass}`}>
+              {feeBadgeText}
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Details */}
+        <div className="bg-white p-4 md:p-6 rounded-xl border border-[#c6c6cd] shadow-sm flex-grow flex flex-col">
+          <h3 className="text-lg font-semibold text-[#005596] flex items-center border-b border-[#c6c6cd] pb-2 mb-4">
+            <span className="material-symbols-outlined mr-2 text-[#F15A24]">account_balance_wallet</span>
+            Payment Details
+          </h3>
+
+          <div className="mb-4">
+            <label className="block text-xs font-bold text-[#45464d] uppercase mb-1">Payment Method <span className="text-[#ba1a1a]">*</span></label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="material-symbols-outlined text-[#76777d]">credit_card</span>
+              </span>
+              <select
+                name="payment_method"
+                required
+                value={paymentMethod}
+                onChange={(e) => {
+                  setPaymentMethod(e.target.value);
+                  if (e.target.value === "Waived") setAmountPaid("0");
+                }}
+                className="block w-full pl-10 pr-10 py-2 h-10 border border-[#c6c6cd] rounded bg-[#f8f9ff] text-[#0b1c30] focus:outline-none focus:ring-2 focus:ring-[#F15A24] focus:border-transparent transition-all text-sm appearance-none"
+              >
+                <option value="" disabled>Select Method</option>
+                <option value="Cash">Cash</option>
+                <option value="MoMo">Mobile Money (MoMo)</option>
+                <option value="Bank">Bank Transfer</option>
+                <option value="Waived">Waived (Admin Only)</option>
+              </select>
+              <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <span className="material-symbols-outlined text-[#76777d]">expand_more</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="mb-4 flex-grow">
+            <label className="block text-xs font-bold text-[#45464d] uppercase mb-1">Amount Received (UGX) <span className="text-[#ba1a1a]">*</span></label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="text-[#76777d] font-mono font-bold text-sm">UGX</span>
+              </span>
+              <input
+                name="amount_paid"
+                type="number"
+                min="0"
+                step="1000"
+                required
+                readOnly={isWaived}
+                value={amountPaid}
+                onChange={(e) => setAmountPaid(e.target.value)}
+                placeholder="0"
+                className={`block w-full pl-12 pr-10 py-2 h-10 border rounded bg-[#f8f9ff] text-[#0b1c30] font-mono text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all ${showHelper ? 'border-[#ba1a1a] focus:ring-[#ba1a1a]' : showSuccess ? 'border-[#F15A24] focus:ring-[#F15A24]' : 'border-[#c6c6cd] focus:ring-[#F15A24]'}`}
+              />
+              {showSuccess && (
+                <span className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span className="material-symbols-outlined text-[#F15A24]">check_circle</span>
+                </span>
+              )}
+            </div>
+            {showHelper && (
+              <p className="mt-1 text-xs font-bold text-[#ba1a1a]">Amount does not match required fee.</p>
             )}
-          </label>
-          <input
-            name="amount_paid"
-            type="number"
-            min="0"
-            step="1000"
-            inputMode="numeric"
-            defaultValue={existing?.amount_paid ?? (fee ?? 0)}
-            key={fee ?? "default"}
-            className={inputCls}
-          />
-        </div>
-        <div>
-          <label className={labelCls}>Payment Method <span className="text-orange-500">*</span></label>
-          <select
-            name="payment_method"
-            defaultValue={existing?.payment_method ?? "Cash"}
-            className={inputCls}
+          </div>
+
+          {/* Feedback messages */}
+          {state?.error && (
+            <div className="mb-4 rounded-lg bg-[#ffdad6] border border-[#ba1a1a]/20 px-3 py-2 text-sm text-[#93000a]">
+              {state.error}
+            </div>
+          )}
+          {state?.ok && (
+            <div className="mb-4 rounded-lg bg-[#eaf1ff] border border-[#005596]/20 px-3 py-2 text-sm text-[#005596] font-medium">
+              {state.ok}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={pending || (amountPaid !== "" && !isValidAmount && !isWaived)}
+            className="w-full bg-[#005596] hover:bg-[#00437a] text-white font-semibold text-lg py-3 px-4 rounded-lg shadow-sm transition-all flex items-center justify-center hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed mt-auto"
           >
-            <option value="Cash">Cash</option>
-            <option value="MoMo">Mobile Money (MoMo)</option>
-            <option value="Bank">Bank Transfer</option>
-            <option value="Waived">Waived</option>
-          </select>
+            <span className="material-symbols-outlined mr-2">how_to_reg</span>
+            {pending ? "Saving..." : existing ? "Update Registration" : "Register Attendee"}
+          </button>
         </div>
       </div>
-
-      {/* Phone + Notes */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelCls}>Phone</label>
-          <input
-            name="phone"
-            inputMode="tel"
-            defaultValue={existing?.phone}
-            placeholder="e.g. 0772 123 456"
-            className={inputCls}
-          />
-        </div>
-        <div>
-          <label className={labelCls}>Notes</label>
-          <input
-            name="notes"
-            defaultValue={existing?.notes}
-            placeholder="Any remarks…"
-            className={inputCls}
-          />
-        </div>
-      </div>
-
-      {/* Allow duplicate */}
-      {!existing && (
-        <label className="flex items-center gap-2.5 text-sm text-slate-500 cursor-pointer">
-          <input
-            type="checkbox"
-            name="allow_duplicate"
-            value="yes"
-            className="w-4 h-4 rounded accent-amber-400"
-          />
-          Allow duplicate name for this church
-        </label>
-      )}
-
-      {/* Feedback */}
-      {state?.error && (
-        <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
-          {state.error}
-        </div>
-      )}
-      {state?.ok && (
-        <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700 font-medium">
-          {state.ok}
-        </div>
-      )}
-
-      {/* Submit */}
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-xl bg-gradient-to-r from-blue-700 to-blue-900 px-4 py-3 font-semibold text-white hover:from-blue-600 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-900/20 text-sm"
-      >
-        {pending ? "Saving…" : existing ? "Update Record" : "Register Attendee"}
-      </button>
     </form>
   );
 }

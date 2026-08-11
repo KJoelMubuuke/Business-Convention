@@ -7,60 +7,81 @@ export default function ForgotPasswordPage() {
   const [state, action, pending] = useActionState(forgotPassword, null);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-10"
-        style={{ backgroundImage: "url('/logo.png')" }}
-      />
-      <div className="w-full max-w-md relative z-10">
+    <div className="bg-[#f8f9ff] min-h-screen flex flex-col justify-center items-center p-4 md:p-10 font-sans text-[#0b1c30]">
+      <main className="w-full max-w-[440px] bg-white rounded-xl border border-[#c6c6cd] shadow-[0_4px_6px_-1px_rgba(0,0,0,0.04),0_2px_4px_-1px_rgba(0,0,0,0.04)] p-6 md:p-8 relative z-10">
+        
         <div className="text-center mb-8">
-          <img src="/logo.png" alt="12th Business Convention 2026" className="h-16 w-auto mx-auto object-contain drop-shadow-sm mb-4" />
-        </div>
-
-        <div className="bg-white/90 backdrop-blur-md border border-slate-200/50 rounded-3xl p-8 shadow-2xl">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Reset Password</h2>
-            <p className="text-slate-500 text-sm">Enter your email and we'll send you a reset link</p>
-          </div>
-
-          {state?.ok ? (
-            <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-5 py-4 text-emerald-700 text-sm text-center">
-              {state.ok}
-            </div>
-          ) : (
-            <form action={action} className="space-y-5">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  autoFocus
-                  placeholder="you@example.com"
-                  className="w-full rounded-xl bg-slate-50 border border-slate-300 px-4 py-2.5 text-slate-900 placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-                />
-              </div>
-
-              {state?.error && (
-                <p className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-600">{state.error}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={pending}
-                className="w-full rounded-xl bg-blue-700 hover:bg-blue-800 px-4 py-2.5 font-semibold text-white transition-all disabled:opacity-50"
-              >
-                {pending ? "Sending…" : "Send Reset Link"}
-              </button>
-            </form>
-          )}
-
-          <p className="text-center mt-6 text-sm text-slate-500">
-            Remembered it? <a href="/login" className="text-blue-600 hover:underline">Sign in</a>
+          <img 
+            alt="Business Convention" 
+            className="mx-auto mb-4 max-h-[80px] object-contain" 
+            src="/logo.png" 
+          />
+          <h1 className="text-2xl md:text-3xl font-semibold text-[#005596] tracking-tight mb-2">
+            Reset Password
+          </h1>
+          <p className="text-base text-[#45464d]">
+            Enter your email and we'll send you a reset link
           </p>
         </div>
-      </div>
+
+        {state?.ok ? (
+          <div className="rounded-lg bg-[#eaf1ff] border border-[#005596]/20 px-4 py-4 text-[#005596] text-sm text-center">
+            {state.ok}
+          </div>
+        ) : (
+          <form action={action} className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-sm text-[#0b1c30] font-medium" htmlFor="email">
+                Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                  <span className="material-symbols-outlined text-[#005596] text-[20px]">mail</span>
+                </div>
+                <input 
+                  className="block w-full pl-10 pr-2 py-[10px] h-[40px] border border-[#c6c6cd] rounded-lg text-base bg-white text-[#0b1c30] placeholder-[#76777d] focus:outline-none focus:ring-2 focus:ring-[#005596] focus:border-transparent transition-shadow" 
+                  id="email" 
+                  name="email" 
+                  placeholder="you@example.com" 
+                  required 
+                  type="email"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {state?.error && (
+              <p className="rounded-lg bg-[#ffdad6] border border-[#ba1a1a]/20 px-4 py-2.5 text-sm text-[#93000a]">
+                {state.error}
+              </p>
+            )}
+
+            <div className="pt-2">
+              <button 
+                className="w-full h-[40px] bg-[#F15A24] hover:opacity-90 hover:-translate-y-[2px] transition-all duration-200 ease-in-out text-white text-base font-medium rounded-lg shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" 
+                type="submit"
+                disabled={pending}
+              >
+                <span className="material-symbols-outlined text-[20px]">
+                  {pending ? "hourglass_empty" : "send"}
+                </span>
+                {pending ? "Sending..." : "Send Reset Link"}
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div className="mt-8 text-center text-xs font-bold uppercase tracking-wider text-[#76777d]">
+          © 2026 Business Convention. Secured System.
+        </div>
+        
+        <p className="text-center mt-6 text-sm text-[#45464d]">
+          Remembered it?{" "}
+          <a href="/login" className="text-[#005596] hover:underline font-medium">
+            Sign in
+          </a>
+        </p>
+      </main>
     </div>
   );
 }

@@ -7,134 +7,103 @@ export default function SignupPage() {
   const [state, action, pending] = useActionState(signup, null);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-      <div
-        className="w-full max-w-3xl flex rounded-3xl overflow-hidden shadow-2xl"
-        style={{ minHeight: "460px" }}
-      >
-        {/* ── LEFT BRAND PANEL ───────────────────────────────────────── */}
-        <div
-          className="hidden md:flex flex-col items-center justify-center gap-6 w-2/5 relative p-10"
-          style={{
-            background:
-              "linear-gradient(145deg, #0f2d6e 0%, #1a4fbf 55%, #e85d20 100%)",
-          }}
-        >
-          {/* decorative blob */}
-          <div
-            className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full opacity-20"
-            style={{ background: "#e85d20" }}
+    <div className="bg-[#f8f9ff] min-h-screen flex flex-col justify-center items-center p-4 md:p-10 font-sans text-[#0b1c30]">
+      <main className="w-full max-w-[440px] bg-white rounded-xl border border-[#c6c6cd] shadow-[0_4px_6px_-1px_rgba(0,0,0,0.04),0_2px_4px_-1px_rgba(0,0,0,0.04)] p-6 md:p-8 relative z-10">
+        
+        <div className="text-center mb-8">
+          <img 
+            alt="Business Convention" 
+            className="mx-auto mb-4 max-h-[80px] object-contain" 
+            src="/logo.png" 
           />
-          <div
-            className="absolute -top-10 -left-10 w-36 h-36 rounded-full opacity-10"
-            style={{ background: "#ffffff" }}
-          />
-
-          {/* Logo */}
-          <img
-            src="/logo.png"
-            alt="12th Business Convention 2026"
-            className="relative z-10 w-full max-w-[220px] object-contain drop-shadow-xl"
-          />
-
-          {/* Tag line */}
-          <div className="relative z-10 text-center">
-            <p className="text-white/90 text-sm font-medium leading-relaxed">
-              Already have an account?
-            </p>
-            <a
-              href="/login"
-              className="mt-3 inline-block border-2 border-white/70 text-white text-sm font-semibold px-6 py-2 rounded-full hover:bg-white hover:text-blue-900 transition-all duration-200"
-            >
-              SIGN IN
-            </a>
-          </div>
-        </div>
-
-        {/* ── RIGHT FORM PANEL ────────────────────────────────────────── */}
-        <div className="flex flex-col justify-center bg-white w-full md:w-3/5 px-10 py-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-1">
+          <h1 className="text-2xl md:text-3xl font-semibold text-[#005596] tracking-tight mb-2">
             Create Account
-          </h2>
-          <p className="text-slate-400 text-sm mb-8">
+          </h1>
+          <p className="text-base text-[#45464d]">
             Sign up to access the registration system
           </p>
+        </div>
 
-          <form action={action} className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5"
-              >
-                Email Address
-              </label>
-              <input
-                id="email"
-                name="email"
+        <form action={action} className="space-y-6">
+          <div className="space-y-2">
+            <label className="block text-sm text-[#0b1c30] font-medium" htmlFor="email">
+              Email Address
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                <span className="material-symbols-outlined text-[#005596] text-[20px]">mail</span>
+              </div>
+              <input 
+                className="block w-full pl-10 pr-2 py-[10px] h-[40px] border border-[#c6c6cd] rounded-lg text-base bg-white text-[#0b1c30] placeholder-[#76777d] focus:outline-none focus:ring-2 focus:ring-[#005596] focus:border-transparent transition-shadow" 
+                id="email" 
+                name="email" 
+                placeholder="you@example.com" 
+                required 
                 type="email"
                 autoComplete="email"
-                required
                 autoFocus
-                placeholder="you@example.com"
-                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
               />
             </div>
+          </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5"
-              >
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
+          <div className="space-y-2">
+            <label className="block text-sm text-[#0b1c30] font-medium" htmlFor="password">
+              Password
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                <span className="material-symbols-outlined text-[#005596] text-[20px]">lock</span>
+              </div>
+              <input 
+                className="block w-full pl-10 pr-2 py-[10px] h-[40px] border border-[#c6c6cd] rounded-lg text-base bg-white text-[#0b1c30] placeholder-[#76777d] focus:outline-none focus:ring-2 focus:ring-[#005596] focus:border-transparent transition-shadow" 
+                id="password" 
+                name="password" 
+                placeholder="Min. 6 characters" 
+                required 
+                minLength={6}
                 type="password"
                 autoComplete="new-password"
-                required
-                minLength={6}
-                placeholder="Min. 6 characters"
-                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-slate-900 text-sm placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
               />
             </div>
+          </div>
 
-            {state?.error && (
-              <p className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-sm text-red-600">
-                {state.error}
-              </p>
-            )}
+          {state?.error && (
+            <p className="rounded-lg bg-[#ffdad6] border border-[#ba1a1a]/20 px-4 py-2.5 text-sm text-[#93000a]">
+              {state.error}
+            </p>
+          )}
 
-            {state?.ok && (
-              <p className="rounded-xl bg-green-50 border border-green-200 px-4 py-2.5 text-sm text-green-700">
-                {state.ok}
-              </p>
-            )}
+          {state?.ok && (
+            <p className="rounded-lg bg-[#eaf1ff] border border-[#005596]/20 px-4 py-2.5 text-sm text-[#005596]">
+              {state.ok}
+            </p>
+          )}
 
-            <button
+          <div className="pt-2">
+            <button 
+              className="w-full h-[40px] bg-[#F15A24] hover:opacity-90 hover:-translate-y-[2px] transition-all duration-200 ease-in-out text-white text-base font-medium rounded-lg shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" 
               type="submit"
               disabled={pending}
-              className="w-full rounded-xl py-3 font-bold text-sm text-white shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                background: pending
-                  ? "#94a3b8"
-                  : "linear-gradient(90deg, #e85d20 0%, #f08040 100%)",
-                boxShadow: pending ? "none" : "0 4px 20px rgba(232,93,32,0.35)",
-              }}
             >
-              {pending ? "Creating account…" : "SIGN UP"}
+              <span className="material-symbols-outlined text-[20px]">
+                {pending ? "hourglass_empty" : "person_add"}
+              </span>
+              {pending ? "Creating account..." : "Sign Up"}
             </button>
-          </form>
+          </div>
+        </form>
 
-          {/* mobile-only sign-in link */}
-          <p className="md:hidden text-center mt-6 text-sm text-slate-500">
-            Already have an account?{" "}
-            <a href="/login" className="text-blue-600 hover:underline font-medium">
-              Sign in
-            </a>
-          </p>
+        <div className="mt-8 text-center text-xs font-bold uppercase tracking-wider text-[#76777d]">
+          © 2026 Business Convention. Secured System.
         </div>
-      </div>
+        
+        <p className="text-center mt-6 text-sm text-[#45464d]">
+          Already have an account?{" "}
+          <a href="/login" className="text-[#005596] hover:underline font-medium">
+            Sign in
+          </a>
+        </p>
+      </main>
     </div>
   );
 }
