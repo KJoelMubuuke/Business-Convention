@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { createClient } from "../../../lib/supabase/server";
-import { getActiveConvention } from "../../../lib/queries";
+import { getActiveConvention } from "../../../lib/repositories/convention.repository";
 import type { Attendee } from "../../../lib/types";
 
 const HEADERS: (keyof Attendee)[] = [

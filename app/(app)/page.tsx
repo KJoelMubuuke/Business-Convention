@@ -1,6 +1,7 @@
-import { getLookups, getActiveConvention } from "../../lib/queries";
+import { getLookups } from "../../lib/repositories/lookup.repository";
+import { getActiveConvention } from "../../lib/repositories/convention.repository";
 import { createClient } from "../../lib/supabase/server";
-import AttendeeForm from "../../components/attendee-form";
+import AttendeeForm from "../../components/features/attendees/attendee-form";
 
 export const dynamic = "force-dynamic";
 

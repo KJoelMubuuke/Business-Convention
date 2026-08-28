@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { signup } from "../(app)/actions";
+import { signup } from "../(app)/actions/auth.actions";
 
 export default function SignupPage() {
   const [state, action, pending] = useActionState(signup, null);

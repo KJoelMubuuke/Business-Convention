@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteAttendee } from "../actions";
+import { deleteAttendee } from "../actions/attendee.actions";
 
 export function DeleteButton({ id, name }: { id: string; name: string }) {
   return (

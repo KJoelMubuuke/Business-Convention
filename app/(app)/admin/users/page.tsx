@@ -1,7 +1,7 @@
 import { createClient } from "../../../../lib/supabase/server";
-import { getProfile } from "../../../../lib/queries";
+import { getProfile } from "../../../../lib/repositories/profile.repository";
 import { redirect } from "next/navigation";
-import { updateUserRole } from "../../actions";
+import { updateUserRole } from "../../actions/attendee.actions";
 
 export const dynamic = "force-dynamic";
 

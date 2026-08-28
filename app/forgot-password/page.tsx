@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { forgotPassword } from "../(app)/actions";
+import { forgotPassword } from "../(app)/actions/auth.actions";
 
 export default function ForgotPasswordPage() {
   const [state, action, pending] = useActionState(forgotPassword, null);

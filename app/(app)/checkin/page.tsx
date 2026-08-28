@@ -1,10 +1,11 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { checkInAttendee } from "../actions";
+import { checkInAttendee } from "../actions/attendee.actions";
 import { createClient } from "../../../lib/supabase/client";
 import type { Attendee } from "../../../lib/types";
 import { formatDate } from "../../../lib/format";
+import { QrScanner } from "../../../components/features/checkin/qr-scanner";
 
 type State = { error?: string; ok?: string } | null;
 
@@ -34,6 +35,38 @@ export default function CheckInPage() {
   const [results, setResults] = useState<Attendee[]>([]);
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleScan = async (scannedId: string) => {
+    setShowScanner(false);
+    setQ(scannedId);
+    setSearching(true);
+    const supabase = createClient();
+    
+    // First, try to match by exact ID (if the QR code contains the database UUID)
+    const { data: exactMatch } = await supabase
+      .from("attendees")
+      .select("*")
+      .eq("id", scannedId)
+      .limit(1)
+      .maybeSingle();
+      
+    if (exactMatch) {
+      setResults([exactMatch] as Attendee[]);
+    } else {
+      // Fallback: search by text in case the QR code was something else
+      const { data } = await supabase
+        .from("attendees")
+        .select("*")
+        .or(`full_name.ilike.%${scannedId}%,church.ilike.%${scannedId}%,phone.ilike.%${scannedId}%`)
+        .order("full_name")
+        .limit(20);
+      setResults((data ?? []) as Attendee[]);
+    }
+    
+    setSearching(false);
+    setHasSearched(true);
+  };
 
   async function search() {
     if (q.trim().length < 2) return;
@@ -87,7 +120,10 @@ export default function CheckInPage() {
              {searching ? "..." : "Search"}
            </button>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-white border border-[#c6c6cd] rounded-lg hover:bg-[#e5eeff] transition-colors font-semibold text-sm text-[#0b1c30] h-10 shadow-sm w-full md:w-auto justify-center">
+        <button 
+          onClick={() => setShowScanner(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-white border border-[#c6c6cd] rounded-lg hover:bg-[#e5eeff] transition-colors font-semibold text-sm text-[#0b1c30] h-10 shadow-sm w-full md:w-auto justify-center"
+        >
            <span className="material-symbols-outlined text-[#005596] text-[18px]">qr_code_scanner</span>
            Scan QR Code
         </button>
@@ -156,6 +192,13 @@ export default function CheckInPage() {
           )}
         </div>
       </div>
+      
+      {showScanner && (
+        <QrScanner 
+          onScan={handleScan} 
+          onClose={() => setShowScanner(false)} 
+        />
+      )}
     </div>
   );
 }

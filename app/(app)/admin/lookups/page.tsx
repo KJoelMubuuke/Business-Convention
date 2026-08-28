@@ -1,7 +1,7 @@
 import { createClient } from "../../../../lib/supabase/server";
-import { getProfile } from "../../../../lib/queries";
+import { getProfile } from "../../../../lib/repositories/profile.repository";
 import { redirect } from "next/navigation";
-import LookupsManager from "../../../../components/lookups-manager";
+import LookupsManager from "../../../../components/features/admin/lookups-manager";
 import type { Lookup } from "../../../../lib/types";
 
 export const dynamic = "force-dynamic";

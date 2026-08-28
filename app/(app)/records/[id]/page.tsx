@@ -1,7 +1,9 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "../../../../lib/supabase/server";
-import { getLookups, getActiveConvention, getProfile } from "../../../../lib/queries";
-import AttendeeForm from "../../../../components/attendee-form";
+import { getLookups } from "../../../../lib/repositories/lookup.repository";
+import { getActiveConvention } from "../../../../lib/repositories/convention.repository";
+import { getProfile } from "../../../../lib/repositories/profile.repository";
+import AttendeeForm from "../../../../components/features/attendees/attendee-form";
 import type { Attendee } from "../../../../lib/types";
 import Link from "next/link";
 

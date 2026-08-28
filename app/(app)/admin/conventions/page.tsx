@@ -1,7 +1,7 @@
 import { createClient } from "../../../../lib/supabase/server";
-import { getProfile } from "../../../../lib/queries";
+import { getProfile } from "../../../../lib/repositories/profile.repository";
 import { redirect } from "next/navigation";
-import { createConvention, activateConvention } from "../../actions";
+import { createConvention, activateConvention } from "../../actions/convention.actions";
 import type { Convention } from "../../../../lib/types";
 import { money } from "../../../../lib/format";
 import ConventionForm from "./form";
