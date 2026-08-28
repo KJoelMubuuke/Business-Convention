@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { createClient } from "../../../lib/supabase/server";
-import { getActiveConvention, getProfile } from "../../../lib/queries";
+import { getActiveConvention } from "../../../lib/repositories/convention.repository";
+import { getProfile } from "../../../lib/repositories/profile.repository";
 import { money, formatDate } from "../../../lib/format";
 import type { Attendee } from "../../../lib/types";
 import { DeleteButton } from "./delete-button";
+import { QrBadge } from "../../../components/features/attendees/qr-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -205,11 +207,9 @@ export default async function RecordsPage({
                       <span className="hidden sm:inline text-[#c6c6cd]">•</span>
                       <span className="text-[#45464d]">{r.gender}</span>
                     </div>
-                    {isManagement && (
-                      <div className="text-xs text-[#76777d]">
-                        Registered by <span className="font-medium text-[#45464d]">{profilesMap.get(r.created_by) || "Unknown"}</span> on {formatDate(r.created_at)}
-                      </div>
-                    )}
+                    <div className="text-xs text-[#76777d]">
+                      Registered by <span className="font-medium text-[#45464d]">{profilesMap.get(r.created_by) || "Unknown"}</span> on {formatDate(r.created_at)}
+                    </div>
                   </div>
                 </div>
                 
@@ -225,7 +225,8 @@ export default async function RecordsPage({
                   </div>
                   
                   <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-end">
-                    {profile?.role !== "registerer" && (
+                    <QrBadge id={r.id} name={r.full_name} />
+                    {(profile?.role !== "registerer" || profile?.id === r.created_by) && (
                       <Link href={`/records/${r.id}`} className="px-4 py-2 border border-[#F15A24] text-[#F15A24] rounded-lg hover:bg-[#ffebd6] transition-colors font-semibold text-sm flex items-center gap-2 h-10 w-full sm:w-auto justify-center xl:opacity-0 xl:group-hover:opacity-100 xl:focus-within:opacity-100">
                         <span className="material-symbols-outlined text-[18px]">edit</span>
                         Edit
