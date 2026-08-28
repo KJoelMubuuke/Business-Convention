@@ -55,3 +55,11 @@ export async function updateUserRole(fd: FormData): Promise<void> {
   await updateProfileRoleRepo(String(fd.get("id")), role);
   revalidatePath("/admin/users");
 }
+
+export async function deleteUser(fd: FormData): Promise<void> {
+  const { createClient } = await import("../../../lib/supabase/server");
+  const supabase = await createClient();
+  const targetId = String(fd.get("id"));
+  await supabase.rpc('delete_user_admin', { target_user_id: targetId });
+  revalidatePath("/admin/users");
+}

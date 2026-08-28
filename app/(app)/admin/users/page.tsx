@@ -1,7 +1,7 @@
 import { createClient } from "../../../../lib/supabase/server";
 import { getProfile } from "../../../../lib/repositories/profile.repository";
 import { redirect } from "next/navigation";
-import { updateUserRole } from "../../actions/attendee.actions";
+import { updateUserRole, deleteUser } from "../../actions/attendee.actions";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +56,8 @@ export default async function UsersPage() {
                
                <div className="mt-auto pt-4 border-t border-[#c6c6cd] relative z-10">
                  {u.id !== profile.id ? (
-                   <form action={updateUserRole} className="flex items-center gap-2">
+                   <div className="flex items-center gap-2">
+                      <form action={updateUserRole} className="flex items-center gap-2 flex-grow">
                      <input type="hidden" name="id" value={u.id} />
                      <div className="relative flex-grow">
                         <select
