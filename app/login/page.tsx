@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { login } from "../(app)/actions";
+import { login } from "../(app)/actions/auth.actions";
 
 export default function LoginPage() {
   const [state, action, pending] = useActionState(login, null);
@@ -13,7 +13,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <img 
             alt="Business Convention" 
-            className="mx-auto mb-4 max-h-[80px] object-contain" 
+            className="mx-auto mb-4 max-h-[140px] object-contain" 
             src="/logo.png" 
           />
           <h1 className="text-2xl md:text-3xl font-semibold text-[#005596] tracking-tight mb-2">

@@ -1,7 +1,8 @@
-import { NavLink } from "../../components/nav-link";
-import { BottomNav } from "../../components/bottom-nav";
-import { getProfile, getActiveConvention } from "../../lib/queries";
-import { logout } from "./actions";
+import { NavLink } from "../../components/ui/nav-link";
+import { BottomNav } from "../../components/ui/bottom-nav";
+import { getProfile } from "../../lib/repositories/profile.repository";
+import { getActiveConvention } from "../../lib/repositories/convention.repository";
+import { logout } from "./actions/auth.actions";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const [profile, convention] = await Promise.all([getProfile(), getActiveConvention()]);
@@ -63,11 +64,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {/* TopAppBar */}
         <header className="w-full top-0 sticky z-40 bg-white shadow-sm border-b border-[#c6c6cd] flex justify-between items-center px-4 md:px-10 h-16">
           <div className="flex items-center gap-4">
-            {/* Leading Icon (Mobile Only - Menu placeholder) */}
-            <button className="md:hidden p-2 rounded-full hover:bg-[#eff4ff] transition-colors text-[#0b1c30] active:opacity-80">
-              <span className="material-symbols-outlined">menu</span>
-            </button>
-            <img src="/logo.png" alt="Business Convention" className="h-8 object-contain hidden md:block" />
+            {/* Logo is visible on all screens, hamburger removed because BottomNav handles mobile navigation */}
+            <img src="/logo.png" alt="Business Convention" className="h-12 object-contain hidden md:block" />
             <h1 className="text-2xl font-bold text-[#005596] md:hidden truncate">Business Convention</h1>
           </div>
           
