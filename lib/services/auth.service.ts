@@ -1,4 +1,5 @@
 import { createClient } from "../supabase/server";
+import { createAdminClient } from "../supabase/admin";
 import { clean } from "../format";
 import { getSiteOrigin } from "../site-url";
 
@@ -20,26 +21,24 @@ export async function signIn(
 
 export async function signUp(
   email: string,
-  password: string
+  password: string,
+  fullName: string
 ): Promise<ActionState> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
+  const adminClient = createAdminClient();
+
+  // Use the admin API to create the user with email already confirmed.
+  // This means they can log in immediately — no confirmation email needed.
+  const { data, error } = await adminClient.auth.admin.createUser({
     email,
     password,
-    options: {
-      data: {
-        full_name: email.split("@")[0],
-      },
-    },
+    email_confirm: true,
+    user_metadata: { full_name: fullName || email.split("@")[0] },
   });
+
   if (error) return { error: error.message };
-  // Email confirmation required — session will be null until confirmed
-  if (data.user && !data.session) {
-    return {
-      ok: "Account created! Check your email and click the confirmation link to activate your account.",
-    };
-  }
-  return null;
+  if (!data.user) return { error: "Failed to create account. Please try again." };
+
+  return { ok: "Account created successfully! You can now sign in." };
 }
 
 export async function signOut(): Promise<void> {

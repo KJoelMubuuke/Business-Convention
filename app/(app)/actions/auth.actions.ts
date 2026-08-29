@@ -27,9 +27,10 @@ export async function signup(
 ): Promise<ActionState> {
   const email = clean(fd.get("email"));
   const password = clean(fd.get("password"));
-  const result = await signUp(email, password);
+  const fullName = clean(fd.get("full_name")) ?? "";
+  const result = await signUp(email, password, fullName);
   if (result?.error) return result;
-  if (result?.ok) return result; // email confirmation pending — show message, don't redirect
+  if (result?.ok) return result; // account created — user must sign in manually
   redirect("/");
 }
 
