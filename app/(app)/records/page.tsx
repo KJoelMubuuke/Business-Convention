@@ -62,6 +62,11 @@ export default async function RecordsPage({
   const rows = (data ?? []) as Attendee[];
 
   const total = rows.reduce((s, r) => s + Number(r.amount_paid), 0);
+  const totalOutstanding = rows.reduce((s, r) => {
+    if (r.payment_method === "Waived") return s;
+    const expectedFee = r.residency === "Resident" ? convention.fee_resident : convention.fee_non_resident;
+    return s + Math.max(0, expectedFee - Number(r.amount_paid));
+  }, 0);
   const male = rows.filter((r) => r.gender === "Male").length;
   const resident = rows.filter((r) => r.residency === "Resident").length;
 
@@ -118,6 +123,14 @@ export default async function RecordsPage({
             <span className="material-symbols-outlined text-[#F15A24]">location_on</span>
           </div>
           <div className="text-3xl font-bold text-[#0b1c30] tracking-tight">{resident} / {rows.length - resident}</div>
+        </div>
+        <div className="bg-white p-6 rounded-xl border border-amber-300 shadow-sm hover:-translate-y-0.5 transition-transform">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-amber-700">Outstanding (UGX)</h3>
+            <span className="material-symbols-outlined text-amber-500">account_balance</span>
+          </div>
+          <div className="text-3xl font-bold text-amber-700 tracking-tight">{totalOutstanding === 0 ? "—" : money(totalOutstanding).replace('UGX ', '')}</div>
+          {totalOutstanding > 0 && <p className="text-xs text-amber-600 mt-1">Partial payments on record</p>}
         </div>
       </div>
 
@@ -216,6 +229,25 @@ export default async function RecordsPage({
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full xl:w-auto xl:justify-end mt-2 xl:mt-0">
                   <div className="flex flex-col items-start sm:items-end">
                     <span className="text-lg font-bold text-[#0b1c30] tracking-tight">{money(r.amount_paid)}</span>
+                    {(() => {
+                      if (r.payment_method === "Waived") return null;
+                      const expectedFee = r.residency === "Resident" ? convention.fee_resident : convention.fee_non_resident;
+                      const rowBalance = Math.max(0, expectedFee - Number(r.amount_paid));
+                      if (rowBalance === 0) {
+                        return (
+                          <span className="px-2 py-0.5 rounded mt-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 bg-green-100 text-green-700 border border-green-300">
+                            <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                            Fully Paid
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="px-2 py-0.5 rounded mt-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-300">
+                          <span className="material-symbols-outlined text-[12px]">pending</span>
+                          Bal: {money(rowBalance).replace('UGX ','')}
+                        </span>
+                      );
+                    })()}
                     <span className={`px-2 py-0.5 rounded mt-1 text-[11px] font-bold uppercase tracking-wider flex items-center gap-1 ${PAYMENT_BADGE[r.payment_method] || 'bg-slate-100 text-slate-500'}`}>
                       <span className="material-symbols-outlined text-[12px]">
                          {r.payment_method === 'Waived' ? 'stars' : 'check_circle'}

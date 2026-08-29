@@ -53,11 +53,14 @@ export default function AttendeeForm({
 
   const numericAmount = Number(amountPaid);
   const isWaived = paymentMethod === "Waived";
-  const isValidAmount = isWaived
-    ? true
-    : !isNaN(numericAmount) && numericAmount >= fee;
-  const showHelper = !isWaived && amountPaid !== "" && !isValidAmount;
-  const showSuccess = !isWaived && amountPaid !== "" && isValidAmount;
+  // Partial payments are allowed — no minimum enforcement
+  const hasValidNumber = !isNaN(numericAmount) && amountPaid !== "";
+  const balance = isWaived ? 0 : Math.max(0, fee - (hasValidNumber ? numericAmount : 0));
+  const isFullyPaid = !isWaived && hasValidNumber && balance === 0;
+  const isPartialPayment = !isWaived && hasValidNumber && balance > 0;
+  // showSuccess = green tick when exact / overpaid, showHelper = amber hint when partial
+  const showSuccess = isFullyPaid;
+  const showHelper = isPartialPayment;
 
   return (
     <form ref={formRef} action={action} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -358,10 +361,10 @@ export default function AttendeeForm({
                 onChange={(e) => setAmountPaid(e.target.value)}
                 placeholder="0"
                 className={`block w-full pl-12 pr-10 py-2 h-10 border rounded bg-[#f8f9ff] text-[#0b1c30] font-mono text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
-                  showHelper
-                    ? "border-[#ba1a1a] focus:ring-[#ba1a1a]"
-                    : showSuccess
+                  showSuccess
                     ? "border-[#F15A24] focus:ring-[#F15A24]"
+                    : showHelper
+                    ? "border-amber-400 focus:ring-amber-400"
                     : "border-[#c6c6cd] focus:ring-[#F15A24]"
                 }`}
               />
@@ -370,11 +373,25 @@ export default function AttendeeForm({
                   <span className="material-symbols-outlined text-[#F15A24]">check_circle</span>
                 </span>
               )}
+              {showHelper && (
+                <span className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span className="material-symbols-outlined text-amber-500">pending</span>
+                </span>
+              )}
             </div>
             {showHelper && (
-              <p className="mt-1 text-xs font-bold text-[#ba1a1a]">
-                Amount does not match required fee.
-              </p>
+              <div className="mt-2 flex items-center gap-2 bg-amber-50 border border-amber-300 rounded-lg px-3 py-2">
+                <span className="material-symbols-outlined text-amber-500 text-[16px] flex-shrink-0">account_balance</span>
+                <p className="text-xs font-semibold text-amber-700">
+                  Balance outstanding: <span className="font-bold">UGX {balance.toLocaleString()}</span> — this will be recorded as a partial payment.
+                </p>
+              </div>
+            )}
+            {isFullyPaid && (
+              <div className="mt-2 flex items-center gap-2 bg-green-50 border border-green-300 rounded-lg px-3 py-2">
+                <span className="material-symbols-outlined text-green-600 text-[16px] flex-shrink-0">check_circle</span>
+                <p className="text-xs font-semibold text-green-700">Fully paid — no balance outstanding.</p>
+              </div>
             )}
           </div>
 
@@ -392,7 +409,7 @@ export default function AttendeeForm({
 
           <button
             type="submit"
-            disabled={pending || (amountPaid !== "" && !isValidAmount && !isWaived)}
+            disabled={pending}
             className="w-full bg-[#005596] hover:bg-[#00437a] text-white font-semibold text-lg py-3 px-4 rounded-lg shadow-sm transition-all flex items-center justify-center hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed mt-auto"
           >
             <span className="material-symbols-outlined mr-2">how_to_reg</span>
