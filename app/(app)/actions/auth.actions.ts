@@ -29,6 +29,7 @@ export async function signup(
   const password = clean(fd.get("password"));
   const result = await signUp(email, password);
   if (result?.error) return result;
+  if (result?.ok) return result; // email confirmation pending — show message, don't redirect
   redirect("/");
 }
 

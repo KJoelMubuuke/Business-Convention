@@ -23,7 +23,7 @@ export async function signUp(
   password: string
 ): Promise<ActionState> {
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -33,6 +33,12 @@ export async function signUp(
     },
   });
   if (error) return { error: error.message };
+  // Email confirmation required — session will be null until confirmed
+  if (data.user && !data.session) {
+    return {
+      ok: "Account created! Check your email and click the confirmation link to activate your account.",
+    };
+  }
   return null;
 }
 
