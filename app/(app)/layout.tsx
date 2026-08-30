@@ -86,7 +86,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <main className="flex-1 p-4 md:p-10 bg-[#ffffff] pb-[100px] md:pb-10 relative">
           {/* Mobile Background Logo (Watermark) */}
           <div 
-            className="md:hidden absolute inset-0 z-0 opacity-[0.04] pointer-events-none"
+            className="md:hidden absolute inset-0 z-0 opacity-15 pointer-events-none"
             style={{
               backgroundImage: "url('/logo.png')",
               backgroundSize: "80%",
