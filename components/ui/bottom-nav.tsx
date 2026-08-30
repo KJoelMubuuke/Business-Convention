@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { logout } from "../../../app/(app)/actions/auth.actions";
+import { logout } from "../../app/(app)/actions/auth.actions";
 
 export function BottomNav({ role }: { role?: string }) {
   const pathname = usePathname();
