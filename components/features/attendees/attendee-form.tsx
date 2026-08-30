@@ -333,7 +333,6 @@ export default function AttendeeForm({
                 <option value="" disabled>Select Method</option>
                 <option value="Cash">Cash</option>
                 <option value="MoMo">Mobile Money (MoMo)</option>
-                <option value="Bank">Bank Transfer</option>
                 <option value="Waived">Waived (Admin Only)</option>
               </select>
               <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
