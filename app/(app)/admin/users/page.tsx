@@ -2,6 +2,7 @@ import { createClient } from "../../../../lib/supabase/server";
 import { getProfile } from "../../../../lib/repositories/profile.repository";
 import { redirect } from "next/navigation";
 import { updateUserRole, deleteUser } from "../../actions/attendee.actions";
+import { DeleteUserButton } from "../../../../components/features/admin/delete-user-button";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,7 @@ export default async function UsersPage() {
                         Save
                       </button>
                     </form>
+                    <DeleteUserButton userId={u.id} />
                   </div>
                 ) : (
                   <div className="flex items-center justify-center gap-2 h-10 bg-[#f8f9ff] border border-[#c6c6cd] rounded-lg text-[#76777d] text-sm font-medium italic">
