@@ -15,7 +15,7 @@ export const attendeeSchema = z.object({
   gender: z.enum(["Male", "Female"], { message: "Select a gender" }),
   residency: z.enum(["Resident", "Non-Resident"], { message: "Select residency" }),
   amount_paid: z.coerce.number().min(0, "Amount must be 0 or more"),
-  payment_method: z.enum(["Cash", "MoMo", "Bank", "Waived"]).default("Cash"),
+  payment_method: z.enum(["Cash", "MoMo", "Waived"]).default("Cash"),
   phone: z.string().default(""),
   notes: z.string().default(""),
   allow_duplicate: z.string().optional(),
