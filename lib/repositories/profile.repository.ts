@@ -31,7 +31,13 @@ export async function getAllProfiles(): Promise<Profile[]> {
   return (data ?? []) as Profile[];
 }
 
+import { createAdminClient } from "../supabase/admin";
+
 export async function updateProfileRole(id: string, role: Role): Promise<void> {
-  const supabase = await createClient();
-  await supabase.from("profiles").update({ role }).eq("id", id);
+  const adminClient = createAdminClient();
+  const { error } = await adminClient.from("profiles").update({ role }).eq("id", id);
+  if (error) {
+    console.error("Error updating role:", error.message);
+    throw new Error(error.message);
+  }
 }
