@@ -56,10 +56,13 @@ export async function updateUserRole(fd: FormData): Promise<void> {
   revalidatePath("/admin/users");
 }
 
-export async function deleteUser(fd: FormData): Promise<void> {
-  const { createClient } = await import("../../../lib/supabase/server");
-  const supabase = await createClient();
+export async function deleteUser(_prevState: any, fd: FormData): Promise<void> {
+  const { createAdminClient } = await import("../../../lib/supabase/admin");
+  const adminClient = createAdminClient();
   const targetId = String(fd.get("id"));
-  await supabase.rpc('delete_user_admin', { target_user_id: targetId });
+  
+  // Deleting the user from auth.users will automatically cascade and delete their profile
+  await adminClient.auth.admin.deleteUser(targetId);
   revalidatePath("/admin/users");
 }
+
