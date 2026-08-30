@@ -88,7 +88,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </main>
       </div>
 
-      <BottomNav />
+      <BottomNav role={profile?.role} />
     </div>
   );
 }
