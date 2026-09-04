@@ -1,5 +1,6 @@
 import { NavLink } from "../../components/ui/nav-link";
 import { BottomNav } from "../../components/ui/bottom-nav";
+import { MobileDrawer } from "../../components/ui/mobile-drawer";
 import { getProfile } from "../../lib/repositories/profile.repository";
 import { getActiveConvention } from "../../lib/repositories/convention.repository";
 import { logout } from "./actions/auth.actions";
@@ -63,8 +64,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         
         {/* TopAppBar */}
         <header className="w-full top-0 sticky z-40 bg-white shadow-sm border-b border-[#c6c6cd] flex justify-between items-center px-4 md:px-10 h-16">
-          <div className="flex items-center gap-4">
-            {/* Logo is visible on all screens, hamburger removed because BottomNav handles mobile navigation */}
+          <div className="flex items-center gap-3">
+            {/* Hamburger — mobile only, opens the full nav drawer */}
+            <MobileDrawer role={profile?.role} fullName={profile?.full_name ?? undefined} />
+            {/* Logo — desktop only */}
             <img src="/logo.png" alt="Business Convention" className="h-12 object-contain hidden md:block" />
             <h1 className="text-2xl font-bold text-[#005596] md:hidden truncate">Business Convention</h1>
           </div>
